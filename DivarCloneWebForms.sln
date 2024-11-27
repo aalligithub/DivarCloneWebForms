@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DivarClone.DAL", "DivarClon
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DivarClone.BLL", "DivarClone.BLL\DivarClone.BLL.csproj", "{5F8AC335-062A-4E83-B74C-7043D1AE230B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared", "Shared\Shared.csproj", "{731CE0DC-3260-4BF6-86A0-EE45D7868718}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{5F8AC335-062A-4E83-B74C-7043D1AE230B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5F8AC335-062A-4E83-B74C-7043D1AE230B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5F8AC335-062A-4E83-B74C-7043D1AE230B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{731CE0DC-3260-4BF6-86A0-EE45D7868718}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{731CE0DC-3260-4BF6-86A0-EE45D7868718}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{731CE0DC-3260-4BF6-86A0-EE45D7868718}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{731CE0DC-3260-4BF6-86A0-EE45D7868718}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
