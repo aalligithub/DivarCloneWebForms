@@ -70,6 +70,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AuthenticationDAL.cs" />
     <Compile Include="ListingDAL.cs" />
     <Compile Include="ListingImageDAL.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Shared;
 using static DivarClone.DAL.ListingDTO;
@@ -11,25 +12,17 @@ namespace DivarClone.DAL
 {
     public interface IListingDAL
     {
-        List<ListingDTO> GetAllListings();
+        SqlDataReader GetListings(int? id = null, string username = null, string textToSearch = null, int? categoryEnum = null);
 
-        List<ListingDTO> GetSecretListings(int UserId);
-
-        List<ListingDTO> FilterResult(object categoryEnum);
-
-        List<ListingDTO> SearchResult(string textToSearch);
-
-        List<ListingDTO> ShowUserListings(string Username);
+        SqlDataReader GetListingImages(int? listingId = null);
 
         Task DeleteUserListing(int id);
 
         Task<int?> CreateListingAsync(ListingDTO listing);
 
-        ListingDTO GetSpecificListing(int id);
-
         Task<bool> UpdateListingAsync(ListingDTO listing);
 
-        List<ListingDTO> MapListingsToDTO(SqlDataReader rdr);
+        //List<ListingDTO> MapListingsToDTO(SqlDataReader rdr);
 
         Task<bool> MakeListingSecret(int? listingId);
     }
@@ -75,34 +68,8 @@ namespace DivarClone.DAL
             Constr = _connectionString;
         }
 
-        // this method is actually RetrieveListingWithImages(SqlDataReader rdr) from MVC but here because of the different architecture image handling is moved to BLL
-        public List<ListingDTO> MapListingsToDTO(SqlDataReader rdr)
+        public SqlDataReader GetListings(int? id = null, string username = null, string textToSearch = null, int? categoryEnum = null)
         {
-            var listingsList = new List<ListingDTO>();
-
-            while (rdr.Read())
-            {
-                var listing = new ListingDTO
-                {
-                    Id = Convert.ToInt32(rdr["Id"]),
-                    Name = rdr["Name"].ToString(),
-                    Description = rdr["Description"].ToString(),
-                    Price = Convert.ToInt32(rdr["Price"]),
-                    Poster = rdr["Poster"].ToString(),
-                    category = (Category)Enum.Parse(typeof(Category), rdr["Category"].ToString()),
-                    DateTimeOfPosting = Convert.ToDateTime(rdr["DateTimeOfPosting"]),
-                };
-
-                listingsList.Add(listing);
-            }
-
-            return listingsList;
-        }
-
-        public List<ListingDTO> GetAllListings()
-        {
-            var listingsList = new List<ListingDTO>();
-
             using (var con = new SqlConnection(Constr))
             {
                 con.Open();
@@ -113,9 +80,30 @@ namespace DivarClone.DAL
 
                     cmd.CommandType = System.Data.CommandType.StoredProcedure;
 
+                    if (id.HasValue)
+                    {
+                        cmd.Parameters.AddWithValue("@Id", id);
+                    }
+
+                    if (!string.IsNullOrEmpty(username))
+                    {
+                        cmd.Parameters.AddWithValue("@Username", username);
+                    }
+
+                    if (!string.IsNullOrEmpty(textToSearch))
+                    {
+                        cmd.Parameters.AddWithValue("@TextToSearch", textToSearch);
+                    }
+
+                    if (categoryEnum.HasValue)
+                    {
+                        cmd.Parameters.AddWithValue("@category_enum", categoryEnum.Value);
+                    }
+
                     SqlDataReader rdr = cmd.ExecuteReader();
 
-                    listingsList = MapListingsToDTO(rdr);
+                    return rdr;
+
                 }
                 catch (Exception ex)
                 {
@@ -126,43 +114,40 @@ namespace DivarClone.DAL
                 {
                     con.Close();
                 }
-
-                return listingsList;
             }
         }
 
-        public List<ListingDTO> GetSecretListings(int UserId)
+        public SqlDataReader GetListingImages(int? listingId = null)
         {
-            List<ListingDTO> listingsList = new List<ListingDTO>();
-
             using (var con = new SqlConnection(Constr))
             {
                 con.Open();
 
                 try
                 {
-                    var cmd = new SqlCommand("SP_GetAllSecretListingsWithImages", con);
+                    var cmd = new SqlCommand("SP_GetListingImages", con);
 
                     cmd.CommandType = System.Data.CommandType.StoredProcedure;
 
-                    cmd.Parameters.AddWithValue("@UserId", UserId);
+                    if (listingId.HasValue)
+                    {
+                        cmd.Parameters.AddWithValue("@listingId", listingId.Value);
+                    }
 
                     SqlDataReader rdr = cmd.ExecuteReader();
 
-                    listingsList = MapListingsToDTO(rdr);
+                    return rdr;
                 }
                 catch (Exception ex)
                 {
-                    Logger.Instance.LogError(ex + " Error Getting Listing list from Listings table");
-                    return null;
+                    Logger.Instance.LogError($"Connection to Database failed : {ex}");
+                    throw;
                 }
                 finally
                 {
                     con.Close();
                 }
             }
-
-            return listingsList;
         }
 
         public async Task<int?> CreateListingAsync(ListingDTO listing)
@@ -196,33 +181,6 @@ namespace DivarClone.DAL
             finally
             {
                 con.Close();
-            }
-        }
-
-        public ListingDTO GetSpecificListing(int id)
-        {
-            using (var con = new SqlConnection(Constr))
-            {
-                con.Open();
-
-                try
-                {
-                    var cmd = new SqlCommand("SP_GetSpecificListing", con);
-                    cmd.CommandType = System.Data.CommandType.StoredProcedure;
-
-                    cmd.Parameters.AddWithValue("@Id", id);
-
-                    SqlDataReader rdr = cmd.ExecuteReader();
-
-                    var listing = MapListingsToDTO(rdr).FirstOrDefault();
-
-                    return listing;
-
-                }
-                catch (Exception)
-                {
-                    throw;
-                }
             }
         }
 
@@ -334,91 +292,5 @@ namespace DivarClone.DAL
             }
         }
 
-        public List<ListingDTO> FilterResult(object categoryEnum)
-        {
-            try
-            {
-                if (con != null && con.State == ConnectionState.Closed)
-                {
-                    con.Open();
-                }
-
-                var cmd = new SqlCommand("SP_FilterListing", con);
-                cmd.CommandType = System.Data.CommandType.StoredProcedure;
-
-                cmd.Parameters.AddWithValue("@category_enum", categoryEnum);
-
-                SqlDataReader rdr = cmd.ExecuteReader();
-
-                var listingsList = MapListingsToDTO(rdr);
-
-                return listingsList.ToList();
-
-            }
-            catch (Exception ex)
-            {
-                Logger.Instance.LogError(ex+ "Error creating listing");
-                throw;
-            }
-            finally { con.Close(); }
-        }
-
-        public List<ListingDTO> SearchResult(string textToSearch)
-        {
-            try
-            {
-                if (con != null && con.State == ConnectionState.Closed)
-                {
-                    con.Open();
-                }
-
-                var cmd = new SqlCommand("SP_SearchListing", con);
-                cmd.CommandType = System.Data.CommandType.StoredProcedure;
-
-                cmd.Parameters.AddWithValue("@TextToSearch", textToSearch);
-
-                SqlDataReader rdr = cmd.ExecuteReader();
-
-                var listingsList = MapListingsToDTO(rdr);
-
-                return listingsList.ToList();
-
-            }
-            catch (Exception ex)
-            {
-                Logger.Instance.LogError(ex + "Error creating listing");
-                throw;
-            }
-            finally { con.Close(); }
-        }
-
-        public List<ListingDTO> ShowUserListings(string Username)
-        {
-            try
-            {
-                if (con != null && con.State == ConnectionState.Closed)
-                {
-                    con.Open();
-                }
-
-                var cmd = new SqlCommand("SP_ShowUserListings", con);
-                cmd.CommandType = System.Data.CommandType.StoredProcedure;
-
-                cmd.Parameters.AddWithValue("@Username", Username);
-
-                SqlDataReader rdr = cmd.ExecuteReader();
-
-                var listingsList = MapListingsToDTO(rdr);
-
-                return listingsList.ToList();
-
-            }
-            catch (Exception ex)
-            {
-                Logger.Instance.LogError(ex + "Error creating listing");
-                throw;
-            }
-            finally { con.Close(); }
-        }
     }
 }
