@@ -12,7 +12,7 @@ namespace DivarClone.DAL
 {
     public interface IListingDAL
     {
-        SqlDataReader GetListings(int? id = null, string username = null, string textToSearch = null, int? categoryEnum = null);
+        SqlDataReader GetListings(int? id = null, string username = null, string textToSearch = null, int? categoryEnum = null, bool merged = false);
 
         SqlDataReader GetListingImages(int? listingId = null);
 
@@ -68,15 +68,26 @@ namespace DivarClone.DAL
             Constr = _connectionString;
         }
 
-        public SqlDataReader GetListings(int? id = null, string username = null, string textToSearch = null, int? categoryEnum = null)
+        public SqlDataReader GetListings(int? id = null, string username = null, string textToSearch = null, int? categoryEnum = null, bool merged = false)
         {
+            var storedProcedure = "";
+
             using (var con = new SqlConnection(Constr))
             {
                 con.Open();
 
                 try
                 {
-                    var cmd = new SqlCommand("SP_GetListings", con);
+                    if (merged) //get listings and images together
+                    {
+                        storedProcedure = "SP_GetListingsWithImages";
+                    }
+                    else //get listings individually, when only listings are needed can also be used alongside GetListingImages for full listing
+                    {
+                        storedProcedure = "SP_GetListings";
+                    }
+
+                    var cmd = new SqlCommand(storedProcedure, con);
 
                     cmd.CommandType = System.Data.CommandType.StoredProcedure;
 

@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
-using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
-using System.Xml.Linq;
 using DivarClone.DAL;
 using static DivarClone.DAL.ListingDTO;
 
@@ -12,7 +9,9 @@ namespace DivarClone.BLL
 {
     public interface IListingBLL
     {
-        List<ListingDTO> MapListingsToDTO(SqlDataReader listingReader, SqlDataReader imageReader);
+        List<ListingDTO> MapIndividualListingsAndImagesToDTO(SqlDataReader listingReader, SqlDataReader imageReader);
+
+        List<ListingDTO> MapJoinedListingToDTO(SqlDataReader mergedReader);
     }
 
     public class ListingBLL : IListingBLL
@@ -24,7 +23,7 @@ namespace DivarClone.BLL
             _listingDAL = listingDAL;
         }
 
-        public List<ListingDTO> MapListingsToDTO(SqlDataReader listingReader, SqlDataReader imageReader)
+        public List<ListingDTO> MapIndividualListingsAndImagesToDTO(SqlDataReader listingReader, SqlDataReader imageReader)
         {
             var listingsDictionary = new Dictionary<int, ListingDTO>();
 
@@ -59,6 +58,45 @@ namespace DivarClone.BLL
             }
 
             return listingsDictionary.Values.ToList();
+        }
+
+        public List<ListingDTO> MapJoinedListingToDTO(SqlDataReader mergedReader)
+        {
+            var listingList = new List<ListingDTO>();
+
+            while (mergedReader.Read())
+            {
+                var listingDTO = new ListingDTO()
+                {
+                    Id = Convert.ToInt32(mergedReader["Id"]),
+                    Name = mergedReader["Name"].ToString(),
+                    Description = mergedReader["Description"].ToString(),
+                    Price = Convert.ToInt32(mergedReader["Price"]),
+                    Poster = mergedReader["Poster"].ToString(),
+                    category = (Category)Enum.Parse(typeof(Category), mergedReader["Category"].ToString()),
+                    DateTimeOfPosting = Convert.ToDateTime(mergedReader["DateTimeOfPosting"]),
+
+                    
+                };
+
+                if (!mergedReader.IsDBNull(mergedReader.GetOrdinal("ImagePaths")))
+                {
+                    string concatenatedPaths = mergedReader["ImagePaths"].ToString();
+                    var imagePaths = concatenatedPaths.Split(',');
+
+                    foreach (var imagePath in imagePaths)
+                    {
+                        if (!listingDTO.ImagePath.Contains(imagePath))
+                        {
+                            listingDTO.ImagePath.Add(imagePath);
+                        }
+                    }
+                }
+
+                listingList.Add(listingDTO);
+            }
+
+            return listingList;
         }
 
         //public List<ListingDTO> GetAllListings()
