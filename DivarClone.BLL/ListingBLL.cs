@@ -9,9 +9,7 @@ namespace DivarClone.BLL
 {
     public interface IListingBLL
     {
-        List<ListingDTO> MapIndividualListingsAndImagesToDTO(SqlDataReader listingReader, SqlDataReader imageReader);
-
-        List<ListingDTO> MapJoinedListingToDTO(SqlDataReader mergedReader);
+        List<ListingDTO> GetAllListings();
     }
 
     public class ListingBLL : IListingBLL
@@ -23,89 +21,13 @@ namespace DivarClone.BLL
             _listingDAL = listingDAL;
         }
 
-        public List<ListingDTO> MapIndividualListingsAndImagesToDTO(SqlDataReader listingReader, SqlDataReader imageReader)
+        public List<ListingDTO> GetAllListings()
         {
-            var listingsDictionary = new Dictionary<int, ListingDTO>();
+            var listings = _listingDAL.GetListings(id:2014, isSecret:true);
 
-            while (listingReader.Read())
-            {
-                var listingDTO = new ListingDTO
-                {
-                    Id = Convert.ToInt32(listingReader["Id"]),
-                    Name = listingReader["Name"].ToString(),
-                    Description = listingReader["Description"].ToString(),
-                    Price = Convert.ToInt32(listingReader["Price"]),
-                    Poster = listingReader["Poster"].ToString(),
-                    category = (Category)Enum.Parse(typeof(Category), listingReader["Category"].ToString()),
-                    DateTimeOfPosting = Convert.ToDateTime(listingReader["DateTimeOfPosting"])
-                };
-            }
+            // additional logic can go here (e.g., filtering or sorting)
 
-            while (imageReader.Read())
-            {
-                int listingId = Convert.ToInt32(imageReader["ListingId"]);
-
-                if (listingsDictionary.TryGetValue(listingId, out var listingDTO))
-                {
-                    string imagePath = imageReader["ImagePath"].ToString();
-
-                    // Add ImagePath to the DTO
-                    if (!listingDTO.ImagePath.Contains(imagePath))
-                    {
-                        listingDTO.ImagePath.Add(imagePath);
-                    }
-                }
-            }
-
-            return listingsDictionary.Values.ToList();
+            return listings;
         }
-
-        public List<ListingDTO> MapJoinedListingToDTO(SqlDataReader mergedReader)
-        {
-            var listingList = new List<ListingDTO>();
-
-            while (mergedReader.Read())
-            {
-                var listingDTO = new ListingDTO()
-                {
-                    Id = Convert.ToInt32(mergedReader["Id"]),
-                    Name = mergedReader["Name"].ToString(),
-                    Description = mergedReader["Description"].ToString(),
-                    Price = Convert.ToInt32(mergedReader["Price"]),
-                    Poster = mergedReader["Poster"].ToString(),
-                    category = (Category)Enum.Parse(typeof(Category), mergedReader["Category"].ToString()),
-                    DateTimeOfPosting = Convert.ToDateTime(mergedReader["DateTimeOfPosting"]),
-
-                    
-                };
-
-                if (!mergedReader.IsDBNull(mergedReader.GetOrdinal("ImagePaths")))
-                {
-                    string concatenatedPaths = mergedReader["ImagePaths"].ToString();
-                    var imagePaths = concatenatedPaths.Split(',');
-
-                    foreach (var imagePath in imagePaths)
-                    {
-                        if (!listingDTO.ImagePath.Contains(imagePath))
-                        {
-                            listingDTO.ImagePath.Add(imagePath);
-                        }
-                    }
-                }
-
-                listingList.Add(listingDTO);
-            }
-
-            return listingList;
-        }
-
-        //public List<ListingDTO> GetAllListings()
-        //{
-        //    var listings = _listingDAL.GetAllListings();
-
-        //    // Additional logic can go here (e.g., filtering or sorting)
-
-        //    return listings;
-        //}
     }
 }

@@ -12,8 +12,8 @@
                 <asp:BoundField DataField="Id" HeaderText="ID" />
                 <asp:BoundField DataField="Name" HeaderText="Name" />
                 <asp:BoundField DataField="Description" HeaderText="Description" />
-                <%--<asp:BoundField DataField="Price" HeaderText="Price" />--%>
-                <%--<asp:BoundField DataField="Poster" HeaderText="Poster" />--%>
+                <asp:BoundField DataField="Price" HeaderText="Price" />
+                <asp:BoundField DataField="Poster" HeaderText="Poster" />
                 <asp:BoundField DataField="category" HeaderText="Category" />
                 <asp:BoundField DataField="DateTimeOfPosting" HeaderText="Posted On" />
             </Columns>

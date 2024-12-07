@@ -12,17 +12,19 @@ namespace DivarClone.DAL
 {
     public interface IListingDAL
     {
-        SqlDataReader GetListings(int? id = null, string username = null, string textToSearch = null, int? categoryEnum = null, bool merged = false);
+        List<ListingDTO> GetListings(int? id = null, string username = null, string textToSearch = null, int? categoryEnum = null, bool includeImages = true, bool isSecret = false);
 
         SqlDataReader GetListingImages(int? listingId = null);
+
+        List<ListingDTO> MapIndividualListingsAndImagesToDTO(SqlDataReader listingReader, SqlDataReader imageReader);
+
+        List<ListingDTO> MapJoinedListingToDTO(SqlDataReader mergedReader);
 
         Task DeleteUserListing(int id);
 
         Task<int?> CreateListingAsync(ListingDTO listing);
 
         Task<bool> UpdateListingAsync(ListingDTO listing);
-
-        //List<ListingDTO> MapListingsToDTO(SqlDataReader rdr);
 
         Task<bool> MakeListingSecret(int? listingId);
     }
@@ -68,7 +70,8 @@ namespace DivarClone.DAL
             Constr = _connectionString;
         }
 
-        public SqlDataReader GetListings(int? id = null, string username = null, string textToSearch = null, int? categoryEnum = null, bool merged = false)
+
+        public List<ListingDTO> GetListings(int? id = null, string username = null, string textToSearch = null, int? categoryEnum = null, bool includeImages = true, bool isSecret = false)
         {
             var storedProcedure = "";
 
@@ -78,43 +81,24 @@ namespace DivarClone.DAL
 
                 try
                 {
-                    if (merged) //get listings and images together
-                    {
-                        storedProcedure = "SP_GetListingsWithImages";
-                    }
-                    else //get listings individually, when only listings are needed can also be used alongside GetListingImages for full listing
-                    {
-                        storedProcedure = "SP_GetListings";
-                    }
+                    //get listings and images together or get listings individually, when only listings are needed can also be used alongside GetListingImages for full listing
+
+                    if (includeImages) storedProcedure = "[Listing].[SP_GetListingsWithImages]";
+                    else storedProcedure = "[Listing].[SP_GetListings]";
 
                     var cmd = new SqlCommand(storedProcedure, con);
 
                     cmd.CommandType = System.Data.CommandType.StoredProcedure;
 
-                    if (id.HasValue)
-                    {
-                        cmd.Parameters.AddWithValue("@Id", id);
-                    }
-
-                    if (!string.IsNullOrEmpty(username))
-                    {
-                        cmd.Parameters.AddWithValue("@Username", username);
-                    }
-
-                    if (!string.IsNullOrEmpty(textToSearch))
-                    {
-                        cmd.Parameters.AddWithValue("@TextToSearch", textToSearch);
-                    }
-
-                    if (categoryEnum.HasValue)
-                    {
-                        cmd.Parameters.AddWithValue("@category_enum", categoryEnum.Value);
-                    }
+                    if (id.HasValue) cmd.Parameters.AddWithValue("@Id", id);
+                    if (!string.IsNullOrEmpty(username)) cmd.Parameters.AddWithValue("@Username", username);
+                    if (!string.IsNullOrEmpty(textToSearch)) cmd.Parameters.AddWithValue("@TextToSearch", textToSearch);
+                    if (categoryEnum.HasValue) cmd.Parameters.AddWithValue("@category_enum", categoryEnum.Value);
+                    if (isSecret) cmd.Parameters.AddWithValue("@isSecret", 1);
 
                     SqlDataReader rdr = cmd.ExecuteReader();
-
-                    return rdr;
-
+                    
+                    return MapJoinedListingToDTO(rdr);
                 }
                 catch (Exception ex)
                 {
@@ -140,10 +124,7 @@ namespace DivarClone.DAL
 
                     cmd.CommandType = System.Data.CommandType.StoredProcedure;
 
-                    if (listingId.HasValue)
-                    {
-                        cmd.Parameters.AddWithValue("@listingId", listingId.Value);
-                    }
+                    if (listingId.HasValue) cmd.Parameters.AddWithValue("@listingId", listingId.Value);
 
                     SqlDataReader rdr = cmd.ExecuteReader();
 
@@ -159,6 +140,85 @@ namespace DivarClone.DAL
                     con.Close();
                 }
             }
+        }
+
+        public List<ListingDTO> MapIndividualListingsAndImagesToDTO(SqlDataReader listingReader, SqlDataReader imageReader)
+        {
+            var listingsDictionary = new Dictionary<int, ListingDTO>();
+
+            while (listingReader.Read())
+            {
+                var listingDTO = new ListingDTO
+                {
+                    Id = Convert.ToInt32(listingReader["Id"]),
+                    Name = listingReader["Name"].ToString(),
+                    Description = listingReader["Description"].ToString(),
+                    Price = Convert.ToInt32(listingReader["Price"]),
+                    Poster = listingReader["Poster"].ToString(),
+                    category = (Category)Enum.Parse(typeof(Category), listingReader["Category"].ToString()),
+                    DateTimeOfPosting = Convert.ToDateTime(listingReader["DateTimeOfPosting"])
+                };
+            }
+
+            while (imageReader.Read())
+            {
+                int listingId = Convert.ToInt32(imageReader["ListingId"]);
+
+                if (listingsDictionary.TryGetValue(listingId, out var listingDTO))
+                {
+                    string imagePath = imageReader["ImagePath"].ToString();
+
+                    // Add ImagePath to the DTO
+                    if (!listingDTO.ImagePath.Contains(imagePath))
+                    {
+                        listingDTO.ImagePath.Add(imagePath);
+                    }
+                }
+            }
+
+            return listingsDictionary.Values.ToList();
+        }
+
+        public List<ListingDTO> MapJoinedListingToDTO(SqlDataReader mergedReader)
+        {
+            var listingList = new List<ListingDTO>();
+
+
+            while (mergedReader.Read())
+            {
+                var listingDTO = new ListingDTO()
+                {
+                    Id = Convert.ToInt32(mergedReader["Id"]),
+                    Name = mergedReader["Name"].ToString(),
+                    Description = mergedReader["Description"].ToString(),
+                    Price = Convert.ToInt32(mergedReader["Price"]),
+                    Poster = mergedReader["Poster"].ToString(),
+                    category = (Category)Enum.Parse(typeof(Category), mergedReader["Category"].ToString()),
+                    DateTimeOfPosting = Convert.ToDateTime(mergedReader["DateTimeOfPosting"]),
+
+
+                };
+
+                //ADD FUNCTIONALITY TO SKIP IMAGES IF THE STORED PROCEDURE CHANGES
+                //IF IMAGE PATH NOT EXISTS SKIP THIS:
+                if (!mergedReader.IsDBNull(mergedReader.GetOrdinal("ImagePaths")))
+                {
+                    string concatenatedPaths = mergedReader["ImagePaths"].ToString();
+                    var imagePaths = concatenatedPaths.Split(',');
+
+                    foreach (var imagePath in imagePaths)
+                    {
+                        if (!listingDTO.ImagePath.Contains(imagePath))
+                        {
+                            listingDTO.ImagePath.Add(imagePath);
+                        }
+                    }
+                }
+
+                listingList.Add(listingDTO);
+            }
+
+            return listingList;
         }
 
         public async Task<int?> CreateListingAsync(ListingDTO listing)
