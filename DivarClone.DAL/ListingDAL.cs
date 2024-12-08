@@ -314,10 +314,8 @@ namespace DivarClone.DAL
                 cmd.Parameters.AddWithValue("@Id", id);
 
                 await cmd.ExecuteNonQueryAsync();
-                //try
-                //{
-                //    //delete the images from ftp aswell
-                //}
+
+                // this method doesnt handle ftp operations but make sure images are removed from ftp aswell in the BLL
 
                 return true;
             }
@@ -335,7 +333,34 @@ namespace DivarClone.DAL
 
         public async Task<bool> DeleteListingImage(int imageId)
         {
-            //logic to delete individual images
+            //this will work with a BLL method to delete the image from the ftp 
+            using (var con = new SqlConnection(Constr))
+            {
+                con.Open();
+
+                try
+                {
+                    var cmd = new SqlCommand("SP_DeleteListingImage", con);
+
+                    cmd.CommandType = System.Data.CommandType.StoredProcedure;
+
+                    cmd.Parameters.AddWithValue("@ImageId", imageId);
+
+                    await cmd.ExecuteNonQueryAsync();
+
+                    return true ;
+                }
+                catch (Exception ex)
+                {
+                    Logger.Instance.LogError($"Connection to Database failed : {ex}");
+                    throw;
+                }
+                finally
+                {
+                    con.Close();
+                }
+            }
+
         }
     }
 }
