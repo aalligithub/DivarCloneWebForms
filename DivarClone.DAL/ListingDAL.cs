@@ -14,19 +14,19 @@ namespace DivarClone.DAL
     {
         List<ListingDTO> GetListings(int? id = null, string username = null, string textToSearch = null, int? categoryEnum = null, bool includeImages = true, bool isSecret = false);
 
-        SqlDataReader GetListingImages(int? listingId = null);
-
-        List<ListingDTO> MapIndividualListingsAndImagesToDTO(SqlDataReader listingReader, SqlDataReader imageReader);
-
         List<ListingDTO> MapJoinedListingToDTO(SqlDataReader mergedReader);
 
-        Task DeleteUserListing(int id);
+        Task<bool> DeleteListing(int id);
 
         Task<int?> CreateListingAsync(ListingDTO listing);
+
+        Task<bool> InsertImagePathIntoDB(int? listingId, List<string> PathToImageFTP, string fileHash);
 
         Task<bool> UpdateListingAsync(ListingDTO listing);
 
         Task<bool> MakeListingSecret(int? listingId);
+
+        Task<bool> DeleteListingImage(int imageId);
     }
 
     public class ListingDTO
@@ -52,9 +52,7 @@ namespace DivarClone.DAL
 
         public DateTime DateTimeOfPosting { get; set; }
 
-        public List<string> ImagePath { get; set; } = new List<string>();
-
-        public List<string> ImageData { get; set; } = new List<string>();
+        public Dictionary<int, (string ImagePath, string ImageData)> Images { get; set; } = new Dictionary<int, (string, string)>(); //ImageId is the int key
     }
 
     public class ListingDAL : IListingDAL
@@ -112,73 +110,6 @@ namespace DivarClone.DAL
             }
         }
 
-        public SqlDataReader GetListingImages(int? listingId = null)
-        {
-            using (var con = new SqlConnection(Constr))
-            {
-                con.Open();
-
-                try
-                {
-                    var cmd = new SqlCommand("SP_GetListingImages", con);
-
-                    cmd.CommandType = System.Data.CommandType.StoredProcedure;
-
-                    if (listingId.HasValue) cmd.Parameters.AddWithValue("@listingId", listingId.Value);
-
-                    SqlDataReader rdr = cmd.ExecuteReader();
-
-                    return rdr;
-                }
-                catch (Exception ex)
-                {
-                    Logger.Instance.LogError($"Connection to Database failed : {ex}");
-                    throw;
-                }
-                finally
-                {
-                    con.Close();
-                }
-            }
-        }
-
-        public List<ListingDTO> MapIndividualListingsAndImagesToDTO(SqlDataReader listingReader, SqlDataReader imageReader)
-        {
-            var listingsDictionary = new Dictionary<int, ListingDTO>();
-
-            while (listingReader.Read())
-            {
-                var listingDTO = new ListingDTO
-                {
-                    Id = Convert.ToInt32(listingReader["Id"]),
-                    Name = listingReader["Name"].ToString(),
-                    Description = listingReader["Description"].ToString(),
-                    Price = Convert.ToInt32(listingReader["Price"]),
-                    Poster = listingReader["Poster"].ToString(),
-                    category = (Category)Enum.Parse(typeof(Category), listingReader["Category"].ToString()),
-                    DateTimeOfPosting = Convert.ToDateTime(listingReader["DateTimeOfPosting"])
-                };
-            }
-
-            while (imageReader.Read())
-            {
-                int listingId = Convert.ToInt32(imageReader["ListingId"]);
-
-                if (listingsDictionary.TryGetValue(listingId, out var listingDTO))
-                {
-                    string imagePath = imageReader["ImagePath"].ToString();
-
-                    // Add ImagePath to the DTO
-                    if (!listingDTO.ImagePath.Contains(imagePath))
-                    {
-                        listingDTO.ImagePath.Add(imagePath);
-                    }
-                }
-            }
-
-            return listingsDictionary.Values.ToList();
-        }
-
         public List<ListingDTO> MapJoinedListingToDTO(SqlDataReader mergedReader)
         {
             var listingList = new List<ListingDTO>();
@@ -195,23 +126,23 @@ namespace DivarClone.DAL
                     Poster = mergedReader["Poster"].ToString(),
                     category = (Category)Enum.Parse(typeof(Category), mergedReader["Category"].ToString()),
                     DateTimeOfPosting = Convert.ToDateTime(mergedReader["DateTimeOfPosting"]),
-
-
                 };
 
                 //ADD FUNCTIONALITY TO SKIP IMAGES IF THE STORED PROCEDURE CHANGES
                 //IF IMAGE PATH NOT EXISTS SKIP THIS:
-                if (!mergedReader.IsDBNull(mergedReader.GetOrdinal("ImagePaths")))
+                if (!mergedReader.IsDBNull(mergedReader.GetOrdinal("ImagePairs")))
                 {
-                    string concatenatedPaths = mergedReader["ImagePaths"].ToString();
-                    var imagePaths = concatenatedPaths.Split(',');
+                    var imagePaths = mergedReader["ImagePairs"].ToString().Split(',');
 
-                    foreach (var imagePath in imagePaths)
+                    foreach (var pair in imagePaths)
                     {
-                        if (!listingDTO.ImagePath.Contains(imagePath))
-                        {
-                            listingDTO.ImagePath.Add(imagePath);
-                        }
+                        var parts = pair.Split('$');
+
+                        int.TryParse(parts[0], out int imageId);
+
+                        var imagePath = parts[1];
+
+                        listingDTO.Images.Add(imageId, (imagePath, null));
                     }
                 }
 
@@ -252,6 +183,41 @@ namespace DivarClone.DAL
             finally
             {
                 con.Close();
+            }
+        }
+
+        public async Task<bool> InsertImagePathIntoDB(int? listingId, List<string> PathToImageFTP, string fileHash)
+        {
+            if (con != null && con.State == ConnectionState.Closed)
+            {
+                con.Open();
+            }
+            try
+            {
+                var cmd = new SqlCommand("SP_InsertImagePathIntoImages", con);
+                cmd.CommandType = System.Data.CommandType.StoredProcedure;
+
+                foreach (var path in PathToImageFTP)
+                {
+                    cmd.Parameters.AddWithValue("@ListingId", listingId);
+                    cmd.Parameters.AddWithValue("@ImagePath", path);
+
+                    cmd.Parameters.AddWithValue("@ImageHash", fileHash);
+
+                    await cmd.ExecuteNonQueryAsync();
+                    cmd.Parameters.Clear();
+                }
+                return true;
+
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(ex, "failed to add image path to db");
+                return false;
+            }
+            finally
+            {
+                System.Diagnostics.Debug.WriteLine("\n Successfully added image path to db");
             }
         }
 
@@ -332,7 +298,7 @@ namespace DivarClone.DAL
             return true;
         }
 
-        public async Task DeleteUserListing(int id)
+        public async Task<bool> DeleteListing(int id)
         {
             try
             {
@@ -343,7 +309,7 @@ namespace DivarClone.DAL
                     con.Open();
                 }
 
-                var cmd = new SqlCommand("SP_DeleteUserListing", con);
+                var cmd = new SqlCommand("SP_DeleteListing", con);
                 cmd.CommandType = System.Data.CommandType.StoredProcedure;
                 cmd.Parameters.AddWithValue("@Id", id);
 
@@ -352,10 +318,14 @@ namespace DivarClone.DAL
                 //{
                 //    //delete the images from ftp aswell
                 //}
+
+                return true;
             }
             catch (Exception ex)
             {
                 Logger.Instance.LogError(ex + "Error deleting listing with Id = {Id}" + id);
+
+                return false;
             }
             finally
             {
@@ -363,5 +333,9 @@ namespace DivarClone.DAL
             }
         }
 
+        public async Task<bool> DeleteListingImage(int imageId)
+        {
+            //logic to delete individual images
+        }
     }
 }

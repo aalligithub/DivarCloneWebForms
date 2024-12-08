@@ -23,9 +23,7 @@ namespace DivarClone.BLL
 
         public List<ListingDTO> GetAllListings()
         {
-            var listings = _listingDAL.GetListings(id:2014, isSecret:true);
-
-            // additional logic can go here (e.g., filtering or sorting)
+            var listings = _listingDAL.GetListings();
 
             return listings;
         }
