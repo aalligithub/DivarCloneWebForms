@@ -2,12 +2,9 @@
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Data;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Shared;
-using static DivarClone.DAL.UserDTO;
-using static DivarClone.DAL.ListingDTO;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace DivarClone.DAL
 {
@@ -26,11 +23,15 @@ namespace DivarClone.DAL
         public string PhoneNumber { get; set; }
 
         public string Role { get; set; }
+
+        public List<string> Permissions { get; set; } 
     }
 
+    // this is for scalability if we have a huge number of users
+    // instead of querying a full preset role permission per user, we cache the preset data and join in application since it rarely changes.
+    // the cache should update per change too with a db flag
     public static class PermissionCacheManager
     {
-
         public static Dictionary<string, List<string>> RolePermissionsCache { get; private set; } = new Dictionary<string, List<string>>();
 
         public static void SetRolePermissions(Dictionary<string, List<string>> rolePermissions)
@@ -57,7 +58,6 @@ namespace DivarClone.DAL
                     {
                         var roleName = rdr["RoleName"].ToString();
 
-                        // Use the correct alias name "Permissions" from your SQL query
                         var permissions = rdr["Permissions"].ToString().Split(',');
 
                         if (!RolePermissionsCache.ContainsKey(roleName))
@@ -72,24 +72,18 @@ namespace DivarClone.DAL
                     }
                 }
             }
-            // for debugging
-            // foreach (var roleName in RolePermissionsCache.Keys)
-            // {
-            //     var permissions = string.Join(", ", RolePermissionsCache[roleName]); // Combine the permissions into a single string
-            //     System.Diagnostics.Debug.WriteLine($"Role: {roleName}, Permissions: {permissions}");
-            // }
         }
     }
 
     public interface IAuthenticationDAL
     {
-        Task<bool> SignUserIn(UserDTO userDTO);
+        Task<bool> SignUserUp(UserDTO userDTO);
 
-        //Task<bool> LogUserIn(UserDTO userDTO);
+        Task<bool> AuthenticateUser(string email, string password);
 
-        Task<bool> GiveUserRole(int userId);
+        Task<bool> AssignUserRole(int userId, string roleName, bool updateExistingRole = false);
 
-        Task<bool> GiveUserSpecialPermission(int userId);
+        Task<bool> GiveUserSpecialPermission(int userId, string permissionName);
     }
 
     public class AuthenticationDAL : IAuthenticationDAL
@@ -105,10 +99,8 @@ namespace DivarClone.DAL
             Constr = _connectionString;
         }
 
-        public async Task<bool> SignUserIn(UserDTO userDTO)
+        public async Task<bool> SignUserUp(UserDTO userDTO)
         {
-            var userId = 0;
-
             using (var con = new SqlConnection(Constr))
             {
                 con.Open();
@@ -127,19 +119,17 @@ namespace DivarClone.DAL
 
                     SqlDataReader rdr = await cmd.ExecuteReaderAsync();
 
-                    //at this point Im sleepy so
-
                     if (rdr.Read()) {
-                        userId = Convert.ToInt32(rdr["Id"]); 
+
+                        await AssignUserRole(Convert.ToInt32(rdr["Id"]), roleName:"RegularUser");
+
+                        return true;
                     }
                     else
                     {
                         return false;
                     }
 
-                    GiveUserRole(userId, baseRoll:true);
-
-                    return true;
                 }
                 catch (Exception ex)
                 {
@@ -154,15 +144,17 @@ namespace DivarClone.DAL
             }
         }
 
-        public async Task<bool> EvaluateUser(string email, string password)
+        public async Task<bool> AuthenticateUser(string email, string password)
         {
+            var userDTO = new UserDTO();
+
             using (var con = new SqlConnection(Constr))
             {
                 con.Open();
 
                 try
                 {
-                    var cmd = new SqlCommand("[Enrollement].[SP_LogUserIn]", con);
+                    var cmd = new SqlCommand("[Enrollement].[SP_AuthenticateUser]", con);
 
                     cmd.CommandType = System.Data.CommandType.StoredProcedure;
 
@@ -171,20 +163,25 @@ namespace DivarClone.DAL
 
                     SqlDataReader rdr = cmd.ExecuteReader();
 
-                    if (rdr.Read())
+                    if (rdr.Read()) // if evaluation success
                     {
-                        var userDTO = new UserDTO()
+                        userDTO.Id = Convert.ToInt32(rdr["Id"]);
+                        userDTO.Name = rdr["Name"].ToString();
+                        userDTO.Username = rdr["Username"].ToString();
+                        userDTO.Email = rdr["Email"].ToString();
+                        userDTO.PhoneNumber = rdr["Phone"].ToString();
+                        userDTO.Role = rdr["RoleName"].ToString();
+
+                        var permissions = rdr["Permissions"].ToString().Split(',');
+
+                        foreach (var permission in permissions)
                         {
-                            Id = Convert.ToInt32(rdr["Id"]),
-                            Name = rdr["Name"].ToString(),
-                            Username = rdr["Username"].ToString(),
-                            Email = rdr["Email"].ToString(),
-                            PhoneNumber = rdr["Phone"].ToString(),
-                            Role = rdr["RoleName"].ToString(),
-                        };
+                            userDTO.Permissions.Add(permission);
+                        }
+
                     }
 
-                    //await AuthenticateUser(userDTO);
+                    await AuthorizeUser(userDTO);
 
                     return true;
                 }
@@ -201,29 +198,86 @@ namespace DivarClone.DAL
             }
         }
 
-        public async Task<bool> AuthenticateUser(UserDTO user)
+        public async Task<bool> AuthorizeUser(UserDTO user) //should only handle claims also a bll method
         {
             //set session cookies and policies
             //use UserDTO.role and map permissions to the users policies
             return true;
         }
 
-        public async Task<bool> GiveUserRole(int userId, bool baseRoll = false)
+        public async Task<bool> AssignUserRole(int userId, string roleName, bool updateExistingRole = false)
         {
-            // should be dynamic to handle role changes and default roles probably with parameters used with SignUserIn
             // permissions are fetched seprately per role not per user
-            if (baseRoll != false)
+            using (var con = new SqlConnection(Constr))
             {
-                //give user base role
-                return true;
+                con.Open();
+
+                string storedProcedure = "";
+
+                try
+                {
+                    if (updateExistingRole)
+                    {
+                        storedProcedure = "[Authorize].[SP_ChangeUserRole]";
+
+                    } else {
+                        storedProcedure = "[Authorize].[SP_GiveUserRole]";
+                    }
+
+                    var cmd = new SqlCommand(storedProcedure, con);
+
+                    cmd.CommandType = System.Data.CommandType.StoredProcedure;
+
+                    cmd.Parameters.AddWithValue("@UserId", userId);
+                    cmd.Parameters.AddWithValue("@RoleName", roleName);
+
+                    await cmd.ExecuteNonQueryAsync();
+
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    Logger.Instance.LogError($"Connection to Database failed : {ex}");
+                    throw;
+                }
+                finally
+                {
+                    con.Close();
+                }
             }
-
-            return true;
         }
 
-        public async Task<bool> GiveUserSpecialPermission(int userId)
+        public async Task<bool> GiveUserSpecialPermission(int userId, string permissionName)
         {
-            return true;
+            using (var con = new SqlConnection(Constr))
+            {
+                con.Open();
+
+                try
+                {
+
+                    var cmd = new SqlCommand("[Authorize].[SP_GiveUserSpecialPermission]", con);
+
+                    cmd.CommandType = System.Data.CommandType.StoredProcedure;
+
+                    cmd.Parameters.AddWithValue("@UserId", userId);
+                    cmd.Parameters.AddWithValue("@PermissionName", permissionName);
+
+                    await cmd.ExecuteNonQueryAsync();
+
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    Logger.Instance.LogError($"Connection to Database failed : {ex}");
+                    throw;
+                }
+                finally
+                {
+                    con.Close();
+                }
+            }
         }
+
     }
 }
