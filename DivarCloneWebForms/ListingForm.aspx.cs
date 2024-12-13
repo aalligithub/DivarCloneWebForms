@@ -26,8 +26,8 @@ namespace DivarCloneWebForms
         private void BindListings()
         {
             var listings = _listingBLL.GetAllListings();
-            gvListings.DataSource = listings;
-            gvListings.DataBind();
+            rptListings.DataSource = listings;
+            rptListings.DataBind();
         }
     }
 }

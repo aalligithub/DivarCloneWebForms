@@ -84,6 +84,8 @@ namespace DivarClone.DAL
         Task<bool> AssignUserRole(int userId, string roleName, bool updateExistingRole = false);
 
         Task<bool> GiveUserSpecialPermission(int userId, string permissionName);
+
+        Task<bool> RemoveUserSpecialPermission(int userId, string permissionName);
     }
 
     public class AuthenticationDAL : IAuthenticationDAL
@@ -137,10 +139,6 @@ namespace DivarClone.DAL
 
                     return false;
                 }
-                finally
-                {
-                    con.Close();
-                }
             }
         }
 
@@ -191,10 +189,6 @@ namespace DivarClone.DAL
                     
                     return false;
                 }
-                finally
-                {
-                    con.Close();
-                }
             }
         }
 
@@ -214,16 +208,11 @@ namespace DivarClone.DAL
 
                 string storedProcedure = "";
 
+                if (updateExistingRole) storedProcedure = "[Authorize].[SP_ChangeUserRole]";
+                else storedProcedure = "[Authorize].[SP_GiveUserRole]";
+
                 try
-                {
-                    if (updateExistingRole)
-                    {
-                        storedProcedure = "[Authorize].[SP_ChangeUserRole]";
-
-                    } else {
-                        storedProcedure = "[Authorize].[SP_GiveUserRole]";
-                    }
-
+                { 
                     var cmd = new SqlCommand(storedProcedure, con);
 
                     cmd.CommandType = System.Data.CommandType.StoredProcedure;
@@ -238,11 +227,7 @@ namespace DivarClone.DAL
                 catch (Exception ex)
                 {
                     Logger.Instance.LogError($"Connection to Database failed : {ex}");
-                    throw;
-                }
-                finally
-                {
-                    con.Close();
+                    return false;
                 }
             }
         }
@@ -270,11 +255,34 @@ namespace DivarClone.DAL
                 catch (Exception ex)
                 {
                     Logger.Instance.LogError($"Connection to Database failed : {ex}");
-                    throw;
+                    return false;
                 }
-                finally
+            }
+        }
+
+        public async Task<bool> RemoveUserSpecialPermission(int userId, string permissionName)
+        {
+            using (var con = new SqlConnection(Constr))
+            {
+                con.Open();
+
+                try
                 {
-                    con.Close();
+                    var cmd = new SqlCommand("[Authorize].[SP_RemoveUserSpecialPermission]", con);
+
+                    cmd.CommandType = System.Data.CommandType.StoredProcedure;
+
+                    cmd.Parameters.AddWithValue("@UserId", userId);
+                    cmd.Parameters.AddWithValue("@PermissionName", permissionName);
+
+                    await cmd.ExecuteNonQueryAsync();
+
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    Logger.Instance.LogError($"Connection to Database failed : {ex}");
+                    return false;
                 }
             }
         }

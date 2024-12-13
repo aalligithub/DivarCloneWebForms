@@ -14,7 +14,7 @@ namespace DivarClone.DAL
     {
         List<ListingDTO> GetListings(int? id = null, string username = null, string textToSearch = null, int? categoryEnum = null, bool includeImages = true, bool isSecret = false);
 
-        List<ListingDTO> MapJoinedListingToDTO(SqlDataReader mergedReader);
+        List<ListingDTO> MapJoinedListingToDTO(SqlDataReader mergedReader, bool hasImages);
 
         Task<bool> DeleteListing(int id);
 
@@ -71,14 +71,16 @@ namespace DivarClone.DAL
 
         public List<ListingDTO> GetListings(int? id = null, string username = null, string textToSearch = null, int? categoryEnum = null, bool includeImages = true, bool isSecret = false)
         {
+            var listings = new List<ListingDTO>();
+
             var storedProcedure = "";
 
-            using (var con = new SqlConnection(Constr))
+            try
             {
-                con.Open();
-
-                try
+                using (var con = new SqlConnection(Constr))
                 {
+                    con.Open();
+
                     //get listings and images together or get listings individually, when only listings are needed can also be used alongside GetListingImages for full listing
 
                     if (includeImages) storedProcedure = "[Listing].[SP_GetListingsWithImages]";
@@ -94,23 +96,22 @@ namespace DivarClone.DAL
                     if (categoryEnum.HasValue) cmd.Parameters.AddWithValue("@category_enum", categoryEnum.Value);
                     if (isSecret) cmd.Parameters.AddWithValue("@isSecret", 1);
 
-                    SqlDataReader rdr = cmd.ExecuteReader();
-                    
-                    return MapJoinedListingToDTO(rdr);
-                }
-                catch (Exception ex)
-                {
-                    Logger.Instance.LogError($"Connection to Database failed : {ex}");
-                    throw;
-                }
-                finally
-                {
-                    con.Close();
+                    using (var rdr = cmd.ExecuteReader())
+                    {
+                        listings = MapJoinedListingToDTO(rdr, includeImages);
+                    }
                 }
             }
+            catch (Exception ex)
+            {
+                Logger.Instance.LogError($"Connection to Database failed : {ex}");
+                throw;
+            }
+
+            return listings;
         }
 
-        public List<ListingDTO> MapJoinedListingToDTO(SqlDataReader mergedReader)
+        public List<ListingDTO> MapJoinedListingToDTO(SqlDataReader mergedReader, bool hasImages)
         {
             var listingList = new List<ListingDTO>();
 
@@ -128,21 +129,22 @@ namespace DivarClone.DAL
                     DateTimeOfPosting = Convert.ToDateTime(mergedReader["DateTimeOfPosting"]),
                 };
 
-                //ADD FUNCTIONALITY TO SKIP IMAGES IF THE STORED PROCEDURE CHANGES
-                //IF IMAGE PATH NOT EXISTS SKIP THIS:
-                if (!mergedReader.IsDBNull(mergedReader.GetOrdinal("ImagePairs")))
+                if (hasImages)
                 {
-                    var imagePaths = mergedReader["ImagePairs"].ToString().Split(',');
-
-                    foreach (var pair in imagePaths)
+                    if (!mergedReader.IsDBNull(mergedReader.GetOrdinal("ImagePairs")))
                     {
-                        var parts = pair.Split('$');
+                        var imagePaths = mergedReader["ImagePairs"].ToString().Split(',');
 
-                        int.TryParse(parts[0], out int imageId);
+                        foreach (var pair in imagePaths)
+                        {
+                            var parts = pair.Split('$');
 
-                        var imagePath = parts[1];
+                            int.TryParse(parts[0], out int imageId);
 
-                        listingDTO.Images.Add(imageId, (imagePath, null));
+                            var imagePath = parts[1];
+
+                            listingDTO.Images.Add(imageId, (imagePath, null));
+                        }
                     }
                 }
 
@@ -156,68 +158,60 @@ namespace DivarClone.DAL
         {
             try
             {
-                if (con != null && con.State == ConnectionState.Closed)
+                using (var con = new SqlConnection(Constr))
                 {
                     con.Open();
+
+                    var cmd = new SqlCommand("SP_CreateListing", con);
+                    cmd.CommandType = System.Data.CommandType.StoredProcedure;
+
+                    cmd.Parameters.AddWithValue("@Name", listing.Name);
+                    cmd.Parameters.AddWithValue("@Description", listing.Description);
+                    cmd.Parameters.AddWithValue("@Price", listing.Price);
+                    cmd.Parameters.AddWithValue("@Poster", listing.Poster);
+                    cmd.Parameters.AddWithValue("@Category", (int)listing.category);
+                    cmd.Parameters.AddWithValue("@DateTimeOfPosting", DateTime.Now);
+
+                    int newListingId = Convert.ToInt32(await cmd.ExecuteScalarAsync());
+
+                    System.Diagnostics.Debug.WriteLine("New Listing Created with Listing Id : " + newListingId);
+                    return newListingId;
                 }
-                var cmd = new SqlCommand("SP_CreateListing", con);
-                cmd.CommandType = System.Data.CommandType.StoredProcedure;
-
-                cmd.Parameters.AddWithValue("@Name", listing.Name);
-                cmd.Parameters.AddWithValue("@Description", listing.Description);
-                cmd.Parameters.AddWithValue("@Price", listing.Price);
-                cmd.Parameters.AddWithValue("@Poster", listing.Poster);
-                cmd.Parameters.AddWithValue("@Category", (int)listing.category);
-                cmd.Parameters.AddWithValue("@DateTimeOfPosting", DateTime.Now);
-
-                int newListingId = Convert.ToInt32(await cmd.ExecuteScalarAsync());
-
-                System.Diagnostics.Debug.WriteLine("New Listing Created with Listing Id : " + newListingId);
-                return newListingId;
             }
             catch (Exception ex)
             {
                 Logger.Instance.LogError(ex + "Error creating listing");
-                return null;
-            }
-            finally
-            {
-                con.Close();
+                throw ex;
             }
         }
 
         public async Task<bool> InsertImagePathIntoDB(int? listingId, List<string> PathToImageFTP, string fileHash)
         {
-            if (con != null && con.State == ConnectionState.Closed)
-            {
-                con.Open();
-            }
             try
             {
-                var cmd = new SqlCommand("SP_InsertImagePathIntoImages", con);
-                cmd.CommandType = System.Data.CommandType.StoredProcedure;
-
-                foreach (var path in PathToImageFTP)
+                using (var con = new SqlConnection(Constr))
                 {
-                    cmd.Parameters.AddWithValue("@ListingId", listingId);
-                    cmd.Parameters.AddWithValue("@ImagePath", path);
+                    con.Open();
+                    var cmd = new SqlCommand("SP_InsertImagePathIntoImages", con);
+                    cmd.CommandType = System.Data.CommandType.StoredProcedure;
 
-                    cmd.Parameters.AddWithValue("@ImageHash", fileHash);
+                    foreach (var path in PathToImageFTP)
+                    {
+                        cmd.Parameters.AddWithValue("@ListingId", listingId);
+                        cmd.Parameters.AddWithValue("@ImagePath", path);
 
-                    await cmd.ExecuteNonQueryAsync();
-                    cmd.Parameters.Clear();
+                        cmd.Parameters.AddWithValue("@ImageHash", fileHash);
+
+                        await cmd.ExecuteNonQueryAsync();
+                        cmd.Parameters.Clear();
+                    }
+                    return true;
                 }
-                return true;
-
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine(ex, "failed to add image path to db");
                 return false;
-            }
-            finally
-            {
-                System.Diagnostics.Debug.WriteLine("\n Successfully added image path to db");
             }
         }
 
@@ -225,42 +219,29 @@ namespace DivarClone.DAL
         {
             try
             {
-                if (con != null && con.State == ConnectionState.Closed)
+                using (var con = new SqlConnection(Constr))
                 {
                     con.Open();
+
+                    var cmd = new SqlCommand("SP_UpdateListing", con);
+                    cmd.CommandType = System.Data.CommandType.StoredProcedure;
+
+                    cmd.Parameters.AddWithValue("@Id", listing.Id);
+                    cmd.Parameters.AddWithValue("@Name", listing.Name);
+                    cmd.Parameters.AddWithValue("@Description", listing.Description);
+                    cmd.Parameters.AddWithValue("@Price", listing.Price);
+                    cmd.Parameters.AddWithValue("@Poster", listing.Poster);
+                    cmd.Parameters.AddWithValue("@Category", (int)listing.category);
+                    cmd.Parameters.AddWithValue("@DateTime", DateTime.Now);
+
+                    await cmd.ExecuteNonQueryAsync();
+
+                    Logger.Instance.LogInfo($"Listing with ID {listing.Id} updated successfully.");
+                    return true;
                 }
-
-                var cmd = new SqlCommand("SP_UpdateListing", con);
-                cmd.CommandType = System.Data.CommandType.StoredProcedure;
-
-                cmd.Parameters.AddWithValue("@Id", listing.Id);
-                cmd.Parameters.AddWithValue("@Name", listing.Name);
-                cmd.Parameters.AddWithValue("@Description", listing.Description);
-                cmd.Parameters.AddWithValue("@Price", listing.Price);
-                cmd.Parameters.AddWithValue("@Poster", listing.Poster);
-                cmd.Parameters.AddWithValue("@Category", (int)listing.category);
-                cmd.Parameters.AddWithValue("@DateTime", DateTime.Now);
-
-                await cmd.ExecuteNonQueryAsync();
-
-                Logger.Instance.LogInfo($"Listing with ID {listing.Id} updated successfully.");
-                return true;
             }
             catch (Exception ex)
             {
-                if (con != null && con.State == ConnectionState.Closed)
-                {
-                    con.Open();
-                }
-                var cmd = new SqlCommand("SP_AddLogToDb", con);
-                cmd.CommandType = System.Data.CommandType.StoredProcedure;
-
-                cmd.Parameters.AddWithValue("@Operation", "LISTING UPDATE");
-                cmd.Parameters.AddWithValue("@Details", "Listing updated FAILED with details : " + listing.Id + " " + listing.Name + " " + listing.Description + " " + listing.Price + " " + listing.Poster + " " + (int)listing.category + " " + DateTime.Now + " ");
-                cmd.Parameters.AddWithValue("@LogDate", DateTime.Now);
-
-                await cmd.ExecuteNonQueryAsync();
-
                 Logger.Instance.LogError(ex + $"Error updating listing with ID {listing.Id}");
 
                 return false;
@@ -273,26 +254,22 @@ namespace DivarClone.DAL
             {
                 Logger.Instance.LogInfo("Attempting to make listing with Id = {listingId} secret..." + listingId);
 
-                if (con != null && con.State == ConnectionState.Closed)
+                using (var con = new SqlConnection(Constr))
                 {
                     con.Open();
+
+                    var cmd = new SqlCommand("SP_MakeListingSecret", con);
+                    cmd.CommandType = System.Data.CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@listingId", listingId);
+
+                    await cmd.ExecuteNonQueryAsync();
                 }
-
-                var cmd = new SqlCommand("SP_MakeListingSecret", con);
-                cmd.CommandType = System.Data.CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("@listingId", listingId);
-
-                await cmd.ExecuteNonQueryAsync();
             }
             catch (Exception ex)
             {
                 Logger.Instance.LogError(ex + "Error making listing with Id = {listingId} secret" + listingId);
 
                 return false;
-            }
-            finally
-            {
-                con.Close();
             }
 
             return true;
@@ -304,30 +281,26 @@ namespace DivarClone.DAL
             {
                 Logger.Instance.LogInfo("Attempting to delete listing with Id = {Id}" + id);
 
-                if (con != null && con.State == ConnectionState.Closed)
+                using (var con = new SqlConnection(Constr))
                 {
                     con.Open();
+
+                    var cmd = new SqlCommand("SP_DeleteListing", con);
+                    cmd.CommandType = System.Data.CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@Id", id);
+
+                    await cmd.ExecuteNonQueryAsync();
+
+                    // this method doesnt handle ftp operations but make sure images are removed from ftp aswell in the BLL
+
+                    return true;
                 }
-
-                var cmd = new SqlCommand("SP_DeleteListing", con);
-                cmd.CommandType = System.Data.CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("@Id", id);
-
-                await cmd.ExecuteNonQueryAsync();
-
-                // this method doesnt handle ftp operations but make sure images are removed from ftp aswell in the BLL
-
-                return true;
             }
             catch (Exception ex)
             {
                 Logger.Instance.LogError(ex + "Error deleting listing with Id = {Id}" + id);
 
                 return false;
-            }
-            finally
-            {
-                con.Close();
             }
         }
 
@@ -354,10 +327,6 @@ namespace DivarClone.DAL
                 {
                     Logger.Instance.LogError($"Connection to Database failed : {ex}");
                     throw;
-                }
-                finally
-                {
-                    con.Close();
                 }
             }
 

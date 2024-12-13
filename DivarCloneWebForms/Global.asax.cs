@@ -21,6 +21,7 @@ namespace DivarCloneWebForms
             BundleConfig.RegisterBundles(BundleTable.Bundles);
 
             PermissionCacheManager.LoadRolePermissions("Server=DESKTOP-OOJCK86;Database=DivarCloneV2;Trusted_Connection=True;MultipleActiveResultSets=true;Encrypt=false");
+            
         }
     }
 }
