@@ -15,9 +15,13 @@
     <webopt:bundlereference runat="server" path="~/Content/css" />
     <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
 
+    <%-- navbar --%>
+    <%@ Register src="~/UserControlls/navbar.ascx" tagname="Navbar" tagprefix="uc1" %>
+    <uc1:Navbar ID="Navbar1" runat="server" />
+    <%-- navbar --%>
 </head>
 <body>
-    <form runat="server">
+    <form runat="server"> 
         <asp:ScriptManager runat="server">
             <Scripts>
                 <%--To learn more about bundling scripts in ScriptManager see https://go.microsoft.com/fwlink/?LinkID=301884 --%>
@@ -36,50 +40,17 @@
                 <%--Site Scripts--%>
             </Scripts>
         </asp:ScriptManager>
-
-        <%-- navbar --%>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index"></a>
-
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-
-                <div class="collapse navbar-collapse" id="navbarContent">
-                    <ul class="navbar-nav me-auto">
-                        <li class="nav-item">
-                            
-                        </li>
-
-                        <li class="nav-item">
-                            <a class="btn btn-danger ms-2" asp-area="" asp-controller="AddListing" asp-action="Index">ثبت آگهی</a>
-
-                        </li>
-                    </ul>
-                </div>
-
-                <div class="btn-group me-3">
-                    <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" style="background-color: rgb(220, 53, 69); border: 2px solid white; color: white;">
-                        فیلتر کردن نتایج
-                    </button>
-
-                    <ul class="dropdown-menu">
-                    </ul>
-                </div>
-
-                <div class="input-group" style="width:300px;">
-                    <input id="searchFieldInput" type="text" class="form-control" placeholder="آگهی مورد نظر" aria-label="Recipient's username" aria-describedby="button-addon2">
-                    <button class="btn btn-outline-secondary" type="button" id="button-addon2" onclick="filterByText(document.getElementById('searchFieldInput').value)">جست و جو</button>
-                </div>
-                <div style="margin-left:40px;">
-                </div>
-            </div>
-        </nav>
-        <%-- navbar --%>
+    
 
         <div class="container body-content">
             <asp:ContentPlaceHolder ID="MainContent" runat="server">
+
+                <%-- user control --%>
+                <div id="PartialZoneUserControl" class="col-md-2">
+                    <%@ Register src="~/UserControlls/UserControl.ascx" tagname="UserControl" tagprefix="uc2" %>
+                    <uc2:usercontrol id="UserControl" runat="server" />
+                </div>
+                <%-- user control--%>
 
                 <%-- listings --%>
                 <div id="Div1" class="row" runat="server">
@@ -90,10 +61,17 @@
 
                 <%-- listing detail --%>
                 <div id="Div2" class="row" runat="server">
-                    <asp:ContentPlaceHolder ID="ContentPlaceHolder2" runat="server">
+                    <asp:ContentPlaceHolder ID="ContentPlaceHolder1" runat="server">
                     </asp:ContentPlaceHolder>
                 </div>
                 <%-- listing detail--%>
+
+                <%-- create listing --%>
+                <div id="Div3" class="row" runat="server">
+                    <asp:ContentPlaceHolder ID="CreateListingPlaceHolder" runat="server">
+                    </asp:ContentPlaceHolder>
+                </div>
+                <%-- create listing --%>
 
             </asp:ContentPlaceHolder>
             <hr />
@@ -101,9 +79,11 @@
                 <p>&copy; <%: DateTime.Now.Year %> - My ASP.NET Application</p>
             </footer>
         </div>
-    </form>
+
     <asp:PlaceHolder runat="server">
         <%: Scripts.Render("~/Scripts/bootstrap.js") %>
     </asp:PlaceHolder>
+
+    </form>
 </body>
 </html>

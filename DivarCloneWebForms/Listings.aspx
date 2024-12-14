@@ -1,6 +1,6 @@
-﻿<%@ Page Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="ListingForm.aspx.cs" Inherits="DivarCloneWebForms.Listings"%>
+﻿<%@ Page Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Listings.aspx.cs" Inherits="DivarCloneWebForms.Listings"%>
 
-<asp:Content ID="Content2" ContentPlaceHolderID="DynamicContent" runat="server">
+<asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
 
     <h3 class="mb-3">آگهی ها</h3>
 
