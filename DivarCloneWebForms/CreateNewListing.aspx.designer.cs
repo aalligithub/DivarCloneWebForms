@@ -30,7 +30,7 @@ namespace DivarCloneWebForms
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox ErrorLabel;
+        protected global::System.Web.UI.WebControls.Label ErrorLabel;
 
         /// <summary>
         /// SuccessLabel control.
@@ -39,7 +39,7 @@ namespace DivarCloneWebForms
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox SuccessLabel;
+        protected global::System.Web.UI.WebControls.Label SuccessLabel;
 
         /// <summary>
         /// Name control.

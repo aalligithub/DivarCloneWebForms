@@ -18,9 +18,9 @@ namespace DivarClone.DAL
 
         Task<bool> DeleteListing(int id);
 
-        Task<int?> CreateListingAsync(ListingDTO listing);
+        int? CreateListingAsync(ListingDTO listing);
 
-        Task<bool> InsertImagePathIntoDB(int? listingId, List<string> PathToImageFTP, string fileHash);
+        bool InsertImagePathIntoDB(int? listingId, List<string> PathToImageFTP, string fileHash);
 
         Task<bool> UpdateListingAsync(ListingDTO listing);
 
@@ -156,7 +156,7 @@ namespace DivarClone.DAL
             return listingList;
         }
 
-        public async Task<int?> CreateListingAsync(ListingDTO listing)
+        public int? CreateListingAsync(ListingDTO listing)
         {
             try
             {
@@ -164,7 +164,7 @@ namespace DivarClone.DAL
                 {
                     con.Open();
 
-                    var cmd = new SqlCommand("SP_CreateListing", con);
+                    var cmd = new SqlCommand("[Listing].[SP_CreateListing]", con);
                     cmd.CommandType = System.Data.CommandType.StoredProcedure;
 
                     cmd.Parameters.AddWithValue("@Name", listing.Name);
@@ -174,7 +174,7 @@ namespace DivarClone.DAL
                     cmd.Parameters.AddWithValue("@Category", (int)listing.category);
                     cmd.Parameters.AddWithValue("@DateTimeOfPosting", DateTime.Now);
 
-                    int newListingId = Convert.ToInt32(await cmd.ExecuteScalarAsync());
+                    int newListingId = Convert.ToInt32( cmd.ExecuteScalar());
 
                     System.Diagnostics.Debug.WriteLine("New Listing Created with Listing Id : " + newListingId);
                     return newListingId;
@@ -187,14 +187,14 @@ namespace DivarClone.DAL
             }
         }
 
-        public async Task<bool> InsertImagePathIntoDB(int? listingId, List<string> PathToImageFTP, string fileHash)
+        public bool InsertImagePathIntoDB(int? listingId, List<string> PathToImageFTP, string fileHash)
         {
             try
             {
                 using (var con = new SqlConnection(Constr))
                 {
                     con.Open();
-                    var cmd = new SqlCommand("SP_InsertImagePathIntoImages", con);
+                    var cmd = new SqlCommand("[Listing].[SP_InsertImagePathIntoImages]", con);
                     cmd.CommandType = System.Data.CommandType.StoredProcedure;
 
                     foreach (var path in PathToImageFTP)
@@ -204,7 +204,7 @@ namespace DivarClone.DAL
 
                         cmd.Parameters.AddWithValue("@ImageHash", fileHash);
 
-                        await cmd.ExecuteNonQueryAsync();
+                        cmd.ExecuteNonQuery();
                         cmd.Parameters.Clear();
                     }
                     return true;

@@ -27,9 +27,9 @@ namespace DivarClone.BLL
 
         Task<string> ComputeHash(string toHash);
 
-        Task<bool> GetImageFromFTP(int imageId, string ftpPath);
+        bool GetImageFromFTP(int imageId, string ftpPath);
 
-        Task UploadImageToFTP(string imageId, string ftpPath);
+        bool UploadImageToFTP(byte[] fileBytes, string ftpPath);
 
         List<(HttpPostedFile, string)> CollectDistinctImages(List<HttpPostedFile> ImageFiles);
 
@@ -66,7 +66,7 @@ namespace DivarClone.BLL
                     foreach (var key in keys)
                     {
                         var image = listing.Images[key];
-                        if (GetImageFromFTP(key, image.ImagePath).Result)
+                        if (GetImageFromFTP(key, image.ImagePath))
                         {
                             listing.Images[key] = (image.ImagePath, Path.Combine("/ImageCache/", $"{key}.jpg")); // Update the dictionary entry
                         }
@@ -100,7 +100,7 @@ namespace DivarClone.BLL
 
         public int? CreateListingAsync(ListingDTO listingDTO)
         {
-            return _listingDAL.CreateListingAsync(listingDTO).Result;
+            return _listingDAL.CreateListingAsync(listingDTO);
         }
 
         public async Task<string> ComputeHash(string toHash)
@@ -128,11 +128,11 @@ namespace DivarClone.BLL
             }
         }
 
-        public async Task<bool> GetImageFromFTP(int imageId, string ftpPath)
+        public bool GetImageFromFTP(int imageId, string ftpPath)
         {
             //string localFileName = Path.Combine("/ImageCache/", $"{imageId}.jpg");
 
-            using (var client = new AsyncFtpClient("127.0.0.1", "Ali", "Ak362178"))
+            using (var client = new FtpClient("127.0.0.1", "Ali", "Ak362178"))
             {
                 try
                 {
@@ -146,11 +146,11 @@ namespace DivarClone.BLL
                         Directory.CreateDirectory(localDirectory);
                     }
 
-                    await client.AutoConnect();
+                    client.AutoConnect();
 
                     try
                     {
-                        await client.DownloadFile(localFileName, ftpPath);
+                        client.DownloadFile(localFileName, ftpPath);
                     }
                     catch
                     {
@@ -169,24 +169,28 @@ namespace DivarClone.BLL
             }
         }
 
-        public async Task UploadImageToFTP(string imageId, string ftpPath)
+        public bool UploadImageToFTP(byte[] fileBytes, string ftpPath)
         {
-            string localFileName = Path.Combine("/ImageCache/", $"{imageId}.jpg"); // Assuming the images are JPG format.
-
-            using (var client = new AsyncFtpClient("ftp://127.0.0.1:21", "Ali", "Ak362178"))
+            using (var client = new FtpClient("127.0.0.1", "Ali", "Ak362178"))
             {
                 try
                 {
-                    await client.AutoConnect();
+                    client.AutoConnect();
 
                     // Download the file from FTP and save it locally with imageId as the name.
-                    await client.DownloadFile(localFileName, ftpPath);
+                    using (var memoryStream = new MemoryStream(fileBytes))
+                    {
+                        // Upload the file to the FTP server
+                        client.UploadStream(memoryStream, ftpPath);
+                    }
 
-                    Console.WriteLine($"Image {imageId} downloaded successfully to {localFileName}.");
+                    Console.WriteLine($"Image uploaded loaded successfully to ftp.");
+                    return true;
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Failed to download image {imageId} from {ftpPath}: {ex.Message}");
+                    Console.WriteLine($"Failed to upload image");
+                    return false;
                     // Log the exception or handle the error as needed.
                 }
             }

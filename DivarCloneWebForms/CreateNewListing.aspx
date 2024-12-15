@@ -41,8 +41,8 @@
     <div class="container" style="height: 85vh;">
         <asp:Panel ID="Panel1" runat="server">
 
-            <asp:TextBox ID="ErrorLabel" runat="server"></asp:TextBox>
-            <asp:TextBox ID="SuccessLabel" runat="server"></asp:TextBox>
+            <asp:Label ID="ErrorLabel" runat="server"></asp:Label>
+            <asp:Label ID="SuccessLabel" runat="server"></asp:Label>
 
             <div class="mb-3">
                 <label for="Name">تیتر آگهی</label>
@@ -74,13 +74,15 @@
                 <% for (int i = 1; i <= 6; i++) { %>
                     <div class="custom-file-upload">
                         <label for="ImageFile<%= i %>" id="customLabel<%= i %>">فایل را انتخاب کنید</label>
-                        <input type="file" id="ImageFile<%= i %>" style="display: none;" onchange="updateLabel(<%= i %>)" multiple />
+                        <input type="file" id="ImageFile<%= i %>" name="ImageFile<%= i %>" style="display: none;" onchange="updateLabel(<%= i %>)" />
                         <button type="button" onclick="document.getElementById('ImageFile<%= i %>').click()">انتخاب فایل</button>
                     </div>
                 <% } %>
             </div>
 
-            <asp:HiddenField ID="Poster" runat="server" Value="<%= User.Identity.Name %>" />
+
+            <%--<asp:HiddenField ID="Poster" runat="server" Value="<%= User.Identity.Name %>" />--%>
+            <asp:HiddenField ID="Poster" runat="server" Value="User" />
 
             <asp:Button ID="SubmitButton" runat="server" Text="ثبت آگهی" CssClass="btn btn-primary" OnClick="SubmitButton_Click" />
         </asp:Panel>

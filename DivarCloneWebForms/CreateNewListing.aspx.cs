@@ -1,13 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
 using System.Web;
-using System.Web.UI;
-using System.Web.UI.WebControls;
 using DivarClone.DAL;
-using System.Xml.Linq;
 using DivarClone.BLL;
 using System.IO;
 
@@ -24,14 +19,20 @@ namespace DivarCloneWebForms
                 var connectionString = "Server=DESKTOP-OOJCK86;Database=DivarCloneV2;Trusted_Connection=True;MultipleActiveResultSets=true;Encrypt=false";
 
                 var listingDAL = new ListingDAL(connectionString);
-                _listingBLL = new ListingBLL(listingDAL);
+                var _listingBLL = new ListingBLL(listingDAL);
                 var listingDTO = new ListingDTO();
             }
         }
-    
+
 
         protected void SubmitButton_Click(object sender, EventArgs e)
         {
+            var connectionString = "Server=DESKTOP-OOJCK86;Database=DivarCloneV2;Trusted_Connection=True;MultipleActiveResultSets=true;Encrypt=false";
+
+            var listingDAL = new ListingDAL(connectionString);
+            var _listingBLL = new ListingBLL(listingDAL);
+            var listingDTO = new ListingDTO();
+
             int? listingId = null;
 
             // Retrieve form values
@@ -108,45 +109,51 @@ namespace DivarCloneWebForms
                 }
             }
 
-            try
-            {
-                // Step 2: Deduplicate files using BLL method
-                var distinctImages = _listingBLL.CollectDistinctImages(imageFiles);
-
-                var uploadedPaths = new List<string>();
-
-                foreach (var (file, fileHash) in distinctImages)
+            //if there was images process
+            if (imageFiles.Count > 0)
+            { 
+                try
                 {
-                    // Step 3: Generate unique file path
-                    string uniqueFileName = $"{fileHash}.jpg";
-                    string ftpPath = $"Images/Listings/{uniqueFileName}";
+                    // Step 2: Deduplicate files using BLL method
+                    var distinctImages = _listingBLL.CollectDistinctImages(imageFiles);
 
-                    // Upload image to FTP
-                    using (var memoryStream = new MemoryStream())
+                    var uploadedPaths = new List<string>();
+
+                    foreach (var (file, fileHash) in distinctImages)
                     {
-                        file.InputStream.CopyTo(memoryStream); // Read the uploaded file into memory
-                        byte[] fileBytes = memoryStream.ToArray();
+                        // Step 3: Generate unique file path
+                        string uniqueFileName = $"{fileHash}.jpg";
+                        string ftpPath = $"Images/Listings/{uniqueFileName}";
 
-                        _listingBLL.UploadImageToFTP(uniqueFileName, ftpPath).Wait(); // Ensure the file is uploaded
-                        uploadedPaths.Add(ftpPath); // Collect the FTP path for DB insertion
+                        // Upload image to FTP
+                        using (var memoryStream = new MemoryStream())
+                        {
+                            file.InputStream.CopyTo(memoryStream); // Read the uploaded file into memory
+                            byte[] fileBytes = memoryStream.ToArray();
+
+                            if (_listingBLL.UploadImageToFTP(fileBytes, ftpPath)) // Ensure the file is uploaded
+                            {  
+                                uploadedPaths.Add(ftpPath); // Collect the FTP path for DB insertion
+                            }
+                        }
+                    }
+
+                    // Step 4: Save file paths and hashes to DB
+                    bool isInserted = _listingBLL.InsertImagePathIntoDB(listingId, uploadedPaths, distinctImages.First().Item2);
+
+                    if (isInserted)
+                    {
+                        SuccessLabel.Text = "Listing and images saved successfully!";
+                    }
+                    else
+                    {
+                        ErrorLabel.Text = "Failed to save images to the database.";
                     }
                 }
-
-                // Step 4: Save file paths and hashes to DB
-                bool isInserted = _listingBLL.InsertImagePathIntoDB(listingId, uploadedPaths, distinctImages.First().Item2);
-
-                if (isInserted)
+                catch (Exception ex)
                 {
-                    SuccessLabel.Text = "Listing and images saved successfully!";
+                    ErrorLabel.Text = $"An error occurred: {ex.Message}";
                 }
-                else
-                {
-                    ErrorLabel.Text = "Failed to save images to the database.";
-                }
-            }
-            catch (Exception ex)
-            {
-                ErrorLabel.Text = $"An error occurred: {ex.Message}";
             }
             // Redirect or show success message
             //Response.Redirect("~/SuccessPage.aspx");
