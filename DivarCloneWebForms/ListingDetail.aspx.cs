@@ -40,7 +40,7 @@ namespace DivarCloneWebForms
         {
             try
             {
-                var listing = _listingBLL.GetAllListings(id:listingId);
+                var listing = _listingBLL.GetAllListingsWithImages(id:listingId);
 
                 if (listing != null && listing.Count > 0)
                 {
@@ -50,6 +50,13 @@ namespace DivarCloneWebForms
                     lblPrice.Text = listing[0].Price.ToString();
                     lblPoster.Text = listing[0].Poster;
                     // Bind images to a repeater or other image control
+
+
+                    var images = listing[0].Images?
+                        .Select(kv => new { ImageId = kv.Key, ImageData = kv.Value.ImageData })
+                        .ToList();
+
+                    rptImages.DataSource = images;
                     rptImages.DataBind();
                 }
                 else

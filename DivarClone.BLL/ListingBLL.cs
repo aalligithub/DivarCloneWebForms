@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
-using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -9,10 +7,9 @@ using System.Security.Cryptography;
 using System.Text;
 using DivarClone.DAL;
 using Shared;
-using static DivarClone.DAL.ListingDTO;
-using System.Net;
 using FluentFTP;
-using static System.Net.Mime.MediaTypeNames;
+using System.Web;
+using System.Web.UI;
 
 namespace DivarClone.BLL
 {
@@ -21,13 +18,26 @@ namespace DivarClone.BLL
         List<ListingDTO> GetAllListingsWithImages(int? id = null, string username = null, string textToSearch = null, int? categoryEnum = null, bool includeImages = true, bool isSecret = false);
 
         List<ListingDTO> GetAllListings(
-    int? id = null,
-    string username = null,
-    string textToSearch = null,
-    int? categoryEnum = null,
-    bool includeImages = true,
-    bool isSecret = false);
+            int? id = null,
+            string username = null,
+            string textToSearch = null,
+            int? categoryEnum = null,
+            bool includeImages = true,
+            bool isSecret = false);
+
+        Task<string> ComputeHash(string toHash);
+
+        Task<bool> GetImageFromFTP(int imageId, string ftpPath);
+
+        Task UploadImageToFTP(string imageId, string ftpPath);
+
+        List<(HttpPostedFile, string)> CollectDistinctImages(List<HttpPostedFile> ImageFiles);
+
+        int? CreateListingAsync(ListingDTO listingDTO);
+
+        bool InsertImagePathIntoDB(int? listingId, List<string> PathToImageFTP, string fileHash);
     }
+
 
     public class ListingBLL : IListingBLL
     {
@@ -68,12 +78,12 @@ namespace DivarClone.BLL
         }
 
         public List<ListingDTO> GetAllListings(
-    int? id = null,
-    string username = null,
-    string textToSearch = null,
-    int? categoryEnum = null,
-    bool includeImages = true,
-    bool isSecret = false)
+            int? id = null,
+            string username = null,
+            string textToSearch = null,
+            int? categoryEnum = null,
+            bool includeImages = true,
+            bool isSecret = false)
         {
             var listings = _listingDAL.GetListings(id, username, textToSearch, categoryEnum, includeImages, isSecret);
 
@@ -88,16 +98,10 @@ namespace DivarClone.BLL
             return listings;
         }
 
-        //public void CreateListing(ListingDTO listingDTO) {
-        //    _listingDAL.CreateListingAsync(listingDTO);
-
-        //    if (listingDTO.Images != null || listingDTO.Images.Count >= 1) {
-        //        foreach (var image in listingDTO.Images)
-        //        {
-        //            _listingDAL.InsertImagePathIntoDB(i);
-        //        }
-        //    }
-        //}
+        public int? CreateListingAsync(ListingDTO listingDTO)
+        {
+            return _listingDAL.CreateListingAsync(listingDTO).Result;
+        }
 
         public async Task<string> ComputeHash(string toHash)
         {
@@ -114,7 +118,7 @@ namespace DivarClone.BLL
                     foreach (byte b in hashBytes)
                         hex.AppendFormat("{0:x2}", b); // Lowercase hex
 
-                    return  hex.ToString();
+                    return hex.ToString();
                 }
             }
             catch (Exception ex)
@@ -128,7 +132,7 @@ namespace DivarClone.BLL
         {
             //string localFileName = Path.Combine("/ImageCache/", $"{imageId}.jpg");
 
-            using (var client = new FtpClient("127.0.0.1", "Ali", "Ak362178"))
+            using (var client = new AsyncFtpClient("127.0.0.1", "Ali", "Ak362178"))
             {
                 try
                 {
@@ -142,11 +146,11 @@ namespace DivarClone.BLL
                         Directory.CreateDirectory(localDirectory);
                     }
 
-                    client.AutoConnect();
+                    await client.AutoConnect();
 
                     try
                     {
-                        client.DownloadFile(localFileName, ftpPath);
+                        await client.DownloadFile(localFileName, ftpPath);
                     }
                     catch
                     {
@@ -186,6 +190,48 @@ namespace DivarClone.BLL
                     // Log the exception or handle the error as needed.
                 }
             }
+        }
+
+        public List<(HttpPostedFile, string)> CollectDistinctImages(List<HttpPostedFile> ImageFiles)
+        {
+            string fileHash = "";
+            var uniqueFiles = new List<(HttpPostedFile File, string Hash)>();
+            var fileHashes = new HashSet<string>();
+
+            foreach (var ImageFile in ImageFiles)
+            {
+                try
+                {
+                    fileHash = ComputeHash(ImageFile.FileName).Result;
+
+                    if (!fileHashes.Contains(fileHash))
+                    {
+                        fileHashes.Add(fileHash);
+                        uniqueFiles.Add((ImageFile, fileHash));
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.Instance.LogError(ex+" Error computing hash for ImageFile");
+                    throw;
+                }
+            }
+
+            return uniqueFiles;
+        }
+
+        public bool InsertImagePathIntoDB(int? listingId, List<string> PathToImageFTP, string fileHash)
+        {
+            try
+            {
+                _listingDAL.InsertImagePathIntoDB(listingId, PathToImageFTP, fileHash);
+            }
+            catch (Exception ex)
+            {
+                Logger.Instance.LogError(ex + " Failed to access DAL InserImagePathIntoDB");
+                return false;
+            }
+            return true;
         }
 
     }

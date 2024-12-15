@@ -32,7 +32,7 @@ namespace DivarCloneWebForms
             rptListings.DataBind();
         }
 
-        protected string GetImageData(Dictionary<int, (string ImagePath, string ImageData)> images)
+        protected string GetFirstImageData(Dictionary<int, (string ImagePath, string ImageData)> images)
         {
             // Adjust logic to select the appropriate image
             if (images != null && images.Count > 0)

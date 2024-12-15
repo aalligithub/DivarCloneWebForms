@@ -24,6 +24,24 @@ namespace DivarCloneWebForms
         protected global::System.Web.UI.WebControls.Panel Panel1;
 
         /// <summary>
+        /// ErrorLabel control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox ErrorLabel;
+
+        /// <summary>
+        /// SuccessLabel control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox SuccessLabel;
+
+        /// <summary>
         /// Name control.
         /// </summary>
         /// <remarks>

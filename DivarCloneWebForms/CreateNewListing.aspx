@@ -40,6 +40,10 @@
 
     <div class="container" style="height: 85vh;">
         <asp:Panel ID="Panel1" runat="server">
+
+            <asp:TextBox ID="ErrorLabel" runat="server"></asp:TextBox>
+            <asp:TextBox ID="SuccessLabel" runat="server"></asp:TextBox>
+
             <div class="mb-3">
                 <label for="Name">تیتر آگهی</label>
                 <asp:TextBox ID="Name" runat="server" CssClass="form-control"></asp:TextBox>

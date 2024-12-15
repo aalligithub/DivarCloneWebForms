@@ -10,7 +10,7 @@
 
                     <div class="card h-100">
 
-                        <img src='<%# GetImageData(Eval("Images") as Dictionary<int, (string, string)>) %>' class="card-img-top" style="width:100%; height:300px; object-fit:contain; alt="no img"/>
+                        <img src='<%# GetFirstImageData(Eval("Images") as Dictionary<int, (string, string)>) %>' class="card-img-top" style="width:100%; height:300px; object-fit:contain; alt="no img"/>
 
                         <div class="card-body">
                             <h5 class="card-title">

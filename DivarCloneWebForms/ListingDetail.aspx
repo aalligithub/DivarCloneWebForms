@@ -11,6 +11,11 @@
 <div>
     <h3>Images</h3>
     <asp:Repeater ID="rptImages" runat="server">
+        <ItemTemplate>
+            <div>
+                <img src='<%# Eval("ImageData") %>' id="<%# Eval("ImageId") %>" class="card-img-top" style="width:100%; height:300px; object-fit:contain;" alt="No image"/>
+            </div>
+        </ItemTemplate>
     </asp:Repeater>
 </div>
 </asp:Content>
