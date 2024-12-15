@@ -52,7 +52,7 @@ namespace DivarClone.DAL
 
         public DateTime DateTimeOfPosting { get; set; }
 
-        public Dictionary<int, (string ImagePath, string ImageData)> Images { get; set; } = new Dictionary<int, (string, string)>(); //ImageId is the int key
+        public Dictionary<int, (string ImagePath, string ImageData)> Images { get; set; }// = new Dictionary<int, (string, string)>(); //ImageId is the int key
     }
 
     public class ListingDAL : IListingDAL
@@ -127,6 +127,7 @@ namespace DivarClone.DAL
                     Poster = mergedReader["Poster"].ToString(),
                     category = (Category)Enum.Parse(typeof(Category), mergedReader["Category"].ToString()),
                     DateTimeOfPosting = Convert.ToDateTime(mergedReader["DateTimeOfPosting"]),
+                    Images = new Dictionary<int, (string, string)>()
                 };
 
                 if (hasImages)
@@ -143,6 +144,7 @@ namespace DivarClone.DAL
 
                             var imagePath = parts[1];
 
+                            
                             listingDTO.Images.Add(imageId, (imagePath, null));
                         }
                     }

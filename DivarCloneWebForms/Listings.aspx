@@ -10,7 +10,7 @@
 
                     <div class="card h-100">
 
-                        <img src="" class="card-img-top" style="width:100%; height:300px; object-fit:contain; alt="no img"/>
+                        <img src='<%# GetImageData(Eval("Images") as Dictionary<int, (string, string)>) %>' class="card-img-top" style="width:100%; height:300px; object-fit:contain; alt="no img"/>
 
                         <div class="card-body">
                             <h5 class="card-title">
@@ -34,8 +34,8 @@
                         </div>
 
                         <div class="card-footer">
-                            <a class="btn btn-danger ms-2" onclick=confirmDelete(@listing.Id)> حذف</a>
-                            <a class="btn btn-danger ms-2" onclick=editListing(@listing.Id)>ویرایش</a>
+                            <a class="btn btn-danger ms-2"> حذف</a>
+                            <a class="btn btn-danger ms-2">ویرایش</a>
                         </div>
                     </div>
                 </div>

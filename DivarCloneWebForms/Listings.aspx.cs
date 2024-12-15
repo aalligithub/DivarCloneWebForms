@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using DivarClone.BLL;
 using DivarClone.DAL;
 
@@ -18,16 +21,25 @@ namespace DivarCloneWebForms
                 var listingDAL = new ListingDAL(connectionString);
                 _listingBLL = new ListingBLL(listingDAL);
 
-                // Bind the listings to the GridView
                 BindListings();
             }
         }
 
         private void BindListings()
         {
-            var listings = _listingBLL.GetAllListings();
+            var listings = _listingBLL.GetAllListingsWithImages();
             rptListings.DataSource = listings;
             rptListings.DataBind();
+        }
+
+        protected string GetImageData(Dictionary<int, (string ImagePath, string ImageData)> images)
+        {
+            // Adjust logic to select the appropriate image
+            if (images != null && images.Count > 0)
+            {
+                return images.Values.First().ImageData; // Return the first image's ImageData
+            }
+            return string.Empty; // Fallback if no image is available
         }
     }
 }

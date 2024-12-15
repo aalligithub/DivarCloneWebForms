@@ -12,6 +12,7 @@ using Shared;
 using static DivarClone.DAL.ListingDTO;
 using System.Net;
 using FluentFTP;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace DivarClone.BLL
 {
@@ -47,13 +48,21 @@ namespace DivarClone.BLL
         {
             var listings = _listingDAL.GetListings(id, username, textToSearch, categoryEnum, includeImages, isSecret);
 
-            //foreach (var listing in listings)
-            //{
-            //    foreach (var imagePath in listing.Images)
-            //    {
-            //        GetImagesFromFTP(imagePath[]);
-            //    }
-            //}
+            foreach (var listing in listings)
+            {
+                if (listing.Images != null && listing.Images.Count > 0) {
+
+                    var keys = listing.Images.Keys.ToList(); // Get the keys to iterate over
+                    foreach (var key in keys)
+                    {
+                        var image = listing.Images[key];
+                        if (GetImageFromFTP(key, image.ImagePath).Result)
+                        {
+                            listing.Images[key] = (image.ImagePath, Path.Combine("/ImageCache/", $"{key}.jpg")); // Update the dictionary entry
+                        }
+                    }
+                }
+            }
 
             return listings;
         }
@@ -115,25 +124,43 @@ namespace DivarClone.BLL
             }
         }
 
-        public async Task GetImageFromFTP(string imageId, string ftpPath)
+        public async Task<bool> GetImageFromFTP(int imageId, string ftpPath)
         {
-            string localFileName = Path.Combine("/ImageCache/", $"{imageId}.jpg"); // Assuming the images are JPG format.
+            //string localFileName = Path.Combine("/ImageCache/", $"{imageId}.jpg");
 
-            using (var client = new AsyncFtpClient("ftp.example.com", "username", "password"))
+            using (var client = new FtpClient("127.0.0.1", "Ali", "Ak362178"))
             {
                 try
                 {
-                    await client.AutoConnect();
 
-                    // Download the file from FTP and save it locally with imageId as the name.
-                    await client.DownloadFile(localFileName, ftpPath);
+                    string localDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ImageCache");
+                    string localFileName = Path.Combine(localDirectory, $"{imageId}.jpg");
 
-                    Console.WriteLine($"Image {imageId} downloaded successfully to {localFileName}.");
+                    // Ensure the directory exists
+                    if (!Directory.Exists(localDirectory))
+                    {
+                        Directory.CreateDirectory(localDirectory);
+                    }
+
+                    client.AutoConnect();
+
+                    try
+                    {
+                        client.DownloadFile(localFileName, ftpPath);
+                    }
+                    catch
+                    {
+                        return false;
+                    }
+
+                    Logger.Instance.LogInfo("Image download success");
+                    return true;
+                    
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Failed to download image {imageId} from {ftpPath}: {ex.Message}");
-                    // Log the exception or handle the error as needed.
+                    Logger.Instance.LogError($"{ex.Message} couldnt connect to FTP ");
+                    return false;
                 }
             }
         }
@@ -142,7 +169,7 @@ namespace DivarClone.BLL
         {
             string localFileName = Path.Combine("/ImageCache/", $"{imageId}.jpg"); // Assuming the images are JPG format.
 
-            using (var client = new AsyncFtpClient("ftp.example.com", "username", "password"))
+            using (var client = new AsyncFtpClient("ftp://127.0.0.1:21", "Ali", "Ak362178"))
             {
                 try
                 {
