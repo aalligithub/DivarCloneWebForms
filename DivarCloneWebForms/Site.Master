@@ -15,10 +15,6 @@
     <webopt:bundlereference runat="server" path="~/Content/css" />
     <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
 
-    <%-- navbar --%>
-    <%@ Register src="~/UserControlls/navbar.ascx" tagname="Navbar" tagprefix="uc1" %>
-    <uc1:Navbar ID="Navbar1" runat="server" />
-    <%-- navbar --%>
 </head>
 <body>
     <form runat="server" enctype="multipart/form-data"> 
@@ -44,6 +40,10 @@
 
         <div class="container body-content">
             <asp:ContentPlaceHolder ID="MainContent" runat="server">
+                <%-- navbar --%>
+                <%@ Register src="~/UserControlls/navbar.ascx" tagname="Navbar" tagprefix="uc1" %>
+                <uc1:Navbar ID="Navbar1" runat="server" />
+                <%-- navbar --%>
 
                 <%-- user control --%>
                 <div id="PartialZoneUserControl" class="col-md-2">
@@ -51,6 +51,13 @@
                     <uc2:usercontrol id="UserControl" runat="server" />
                 </div>
                 <%-- user control--%>
+
+                <%-- listings --%>
+                <div id="Div5" class="row" runat="server">
+                    <asp:ContentPlaceHolder ID="AdminDashboardPlaceHolder" runat="server">
+                    </asp:ContentPlaceHolder>
+                </div>
+                <%-- listings --%>
 
                 <%-- listings --%>
                 <div id="Div1" class="row" runat="server">

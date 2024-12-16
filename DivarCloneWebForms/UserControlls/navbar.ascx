@@ -33,6 +33,10 @@
         <div class="input-group" style="width:300px;">
             <input id="searchFieldInput" type="text" class="form-control" placeholder="آگهی مورد نظر" aria-label="Recipient's username" aria-describedby="button-addon2">
             <button class="btn btn-outline-secondary" type="button" id="button-addon2" onclick="filterByText(document.getElementById('searchFieldInput').value)">جست و جو</button>
+
+            <asp:Panel ID="Panel2" runat="server">
+                <asp:button class="btn btn-outline-secondary" Text="خروج" type="button" ID="logout_btn" runat="server" OnClick="LogoutButton_Click"></asp:button>
+            </asp:Panel>
         </div>
         <div style="margin-left:40px;">
         </div>
