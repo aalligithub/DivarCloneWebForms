@@ -5,6 +5,7 @@ using System.Data;
 using System.Threading.Tasks;
 using Shared;
 using static System.Net.Mime.MediaTypeNames;
+using System.Security.Authentication;
 
 namespace DivarClone.DAL
 {
@@ -79,7 +80,7 @@ namespace DivarClone.DAL
     {
         Task<bool> SignUserUp(UserDTO userDTO);
 
-        Task<bool> AuthenticateUser(string email, string password);
+        UserDTO AuthenticateUser(string email, string password);
 
         Task<bool> AssignUserRole(int userId, string roleName, bool updateExistingRole = false);
 
@@ -142,7 +143,7 @@ namespace DivarClone.DAL
             }
         }
 
-        public async Task<bool> AuthenticateUser(string email, string password)
+        public UserDTO AuthenticateUser(string email, string password)
         {
             var userDTO = new UserDTO();
 
@@ -164,7 +165,7 @@ namespace DivarClone.DAL
                     if (rdr.Read()) // if evaluation success
                     {
                         userDTO.Id = Convert.ToInt32(rdr["Id"]);
-                        userDTO.Name = rdr["Name"].ToString();
+                        userDTO.Name = rdr["FirstName"].ToString();
                         userDTO.Username = rdr["Username"].ToString();
                         userDTO.Email = rdr["Email"].ToString();
                         userDTO.PhoneNumber = rdr["Phone"].ToString();
@@ -172,31 +173,28 @@ namespace DivarClone.DAL
 
                         var permissions = rdr["Permissions"].ToString().Split(',');
 
+                        userDTO.Permissions = new List<string>();
+
                         foreach (var permission in permissions)
                         {
                             userDTO.Permissions.Add(permission);
                         }
 
+                        return userDTO;
                     }
-
-                    await AuthorizeUser(userDTO);
-
-                    return true;
+                    else
+                    {
+                        throw new InvalidCredentialException("Wrong Credentials");
+                    }
+                    
                 }
                 catch (Exception ex)
                 {
                     Logger.Instance.LogError($"Connection to Database failed : {ex}");
                     
-                    return false;
+                    throw ex;
                 }
             }
-        }
-
-        public async Task<bool> AuthorizeUser(UserDTO user) //should only handle claims also a bll method
-        {
-            //set session cookies and policies
-            //use UserDTO.role and map permissions to the users policies
-            return true;
         }
 
         public async Task<bool> AssignUserRole(int userId, string roleName, bool updateExistingRole = false)

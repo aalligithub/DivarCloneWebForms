@@ -35,7 +35,7 @@ namespace DivarClone.BLL
 
         int? CreateListingAsync(ListingDTO listingDTO);
 
-        bool InsertImagePathIntoDB(int? listingId, List<string> PathToImageFTP, string fileHash);
+        bool InsertImagePathIntoDB(int? listingId, string PathToImageFTP, string fileHash);
     }
 
 
@@ -224,7 +224,7 @@ namespace DivarClone.BLL
             return uniqueFiles;
         }
 
-        public bool InsertImagePathIntoDB(int? listingId, List<string> PathToImageFTP, string fileHash)
+        public bool InsertImagePathIntoDB(int? listingId, string PathToImageFTP, string fileHash)
         {
             try
             {

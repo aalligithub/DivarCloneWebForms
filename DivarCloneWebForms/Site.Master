@@ -73,6 +73,13 @@
                 </div>
                 <%-- create listing --%>
 
+                <%-- login --%>
+                <div id="Div4" class="row" runat="server">
+                    <asp:ContentPlaceHolder ID="LoginPlaceHolder" runat="server">
+                    </asp:ContentPlaceHolder>
+                </div>
+                <%-- login --%>
+
             </asp:ContentPlaceHolder>
             <hr />
             <footer>

@@ -5,6 +5,7 @@ using System.Web;
 using DivarClone.DAL;
 using DivarClone.BLL;
 using System.IO;
+using Microsoft.Ajax.Utilities;
 
 namespace DivarCloneWebForms
 {
@@ -134,21 +135,21 @@ namespace DivarCloneWebForms
                             if (_listingBLL.UploadImageToFTP(fileBytes, ftpPath)) // Ensure the file is uploaded
                             {  
                                 uploadedPaths.Add(ftpPath); // Collect the FTP path for DB insertion
+                                
+                                // Step 4: Save each file's path and hash to the DB
+                                _listingBLL.InsertImagePathIntoDB(listingId, ftpPath, fileHash);
                             }
                         }
-                    }
-
-                    // Step 4: Save file paths and hashes to DB
-                    bool isInserted = _listingBLL.InsertImagePathIntoDB(listingId, uploadedPaths, distinctImages.First().Item2);
-
-                    if (isInserted)
-                    {
-                        SuccessLabel.Text = "Listing and images saved successfully!";
-                    }
-                    else
-                    {
-                        ErrorLabel.Text = "Failed to save images to the database.";
-                    }
+                    }               
+                    
+                    //if (isInserted)
+                    //{
+                    //    SuccessLabel.Text = "Listing and images saved successfully!";
+                    //}
+                    //else
+                    //{
+                    //    ErrorLabel.Text = "Failed to save images to the database.";
+                    //}
                 }
                 catch (Exception ex)
                 {

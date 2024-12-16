@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Configuration.Provider;
 using System.Linq;
+using System.Security.Claims;
 using System.Web;
 using System.Web.Optimization;
 using System.Web.Routing;
@@ -23,5 +24,6 @@ namespace DivarCloneWebForms
             PermissionCacheManager.LoadRolePermissions("Server=DESKTOP-OOJCK86;Database=DivarCloneV2;Trusted_Connection=True;MultipleActiveResultSets=true;Encrypt=false");
             
         }
+
     }
 }
