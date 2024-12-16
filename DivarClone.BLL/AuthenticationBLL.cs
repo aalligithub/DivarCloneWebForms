@@ -56,6 +56,9 @@ namespace DivarClone.BLL
                 claims.Add("Permissions", permissions);
             }
 
+            //usage
+            //var permissions = claims["Permissions"].Split(',');
+
             return claims;
         }
 
@@ -87,6 +90,23 @@ namespace DivarClone.BLL
             // Redirect to the originally requested page
             string returnUrl = FormsAuthentication.GetRedirectUrl(user.Username, true);
             HttpContext.Current.Response.Redirect(returnUrl);
+        }
+
+        public void Logout()
+        {
+            // Sign out the user by removing the FormsAuthentication ticket
+            FormsAuthentication.SignOut();
+
+            // Optionally clear all cookies to ensure no residual authentication data remains
+            HttpCookie authCookie = HttpContext.Current.Request.Cookies[FormsAuthentication.FormsCookieName];
+            if (authCookie != null)
+            {
+                authCookie.Expires = DateTime.Now.AddDays(-1); // Expire the cookie
+                HttpContext.Current.Response.Cookies.Add(authCookie);
+            }
+
+            // Redirect to the login page or home page
+            HttpContext.Current.Response.Redirect("~/Login.aspx");
         }
     }
 }
