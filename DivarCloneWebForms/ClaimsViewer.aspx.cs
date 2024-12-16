@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Security.Claims;
 using System.Text;
 using System.Web;
+using Newtonsoft.Json;
+using System.Web.Security;
 
 namespace DivarCloneWebForms
 {
@@ -11,26 +14,40 @@ namespace DivarCloneWebForms
         {
             if (!IsPostBack)
             {
-                // Get the current user's ClaimsPrincipal
-                var principal = HttpContext.Current.User as ClaimsPrincipal;
-                if (principal != null)
+                // Get the FormsAuthentication cookie
+                HttpCookie authCookie = HttpContext.Current.Request.Cookies[FormsAuthentication.FormsCookieName];
+                if (authCookie != null)
                 {
-                    // Build an HTML representation of the claims
-                    var claimsHtml = new StringBuilder("<ul>");
-                    foreach (var claim in principal.Claims)
-                    {
-                        claimsHtml.Append($"<li><strong>{claim.Type}:</strong> {claim.Value}</li>");
-                    }
-                    claimsHtml.Append("</ul>");
+                    // Decrypt the cookie value to get the ticket
+                    FormsAuthenticationTicket ticket = FormsAuthentication.Decrypt(authCookie.Value);
 
-                    // Display the claims
-                    ClaimsLiteral.Text = claimsHtml.ToString();
+                    if (ticket != null)
+                    {
+                        // Deserialize the claims from the UserData field
+                        var claims = JsonConvert.DeserializeObject<Dictionary<string, string>>(ticket.UserData);
+
+                        // Build an HTML representation of the claims
+                        var claimsHtml = new StringBuilder("<ul>");
+                        foreach (var claim in claims)
+                        {
+                            claimsHtml.Append($"<li><strong>{claim.Key}:</strong> {claim.Value}</li>");
+                        }
+                        claimsHtml.Append("</ul>");
+
+                        // Display the claims
+                        ClaimsLiteral.Text = claimsHtml.ToString();
+                    }
+                    else
+                    {
+                        ClaimsLiteral.Text = "Failed to decrypt the authentication ticket.";
+                    }
                 }
                 else
                 {
-                    ClaimsLiteral.Text = "No claims are available for the current user.";
+                    ClaimsLiteral.Text = "No authentication cookie found.";
                 }
             }
         }
+
     }
 }

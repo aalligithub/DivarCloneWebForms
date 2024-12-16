@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Web;
 using System.Web.Security;
@@ -48,9 +49,11 @@ namespace DivarClone.BLL
                 { "Email", user.Email },
                 { "Role", user.Role }
             };
-            foreach (var permission in user.Permissions)
+
+            if (user.Permissions != null && user.Permissions.Any())
             {
-                claims.Add($"Permission", permission);
+                var permissions = string.Join(",", user.Permissions);
+                claims.Add("Permissions", permissions);
             }
 
             return claims;
