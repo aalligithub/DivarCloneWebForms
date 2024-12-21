@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Security;
 using DivarClone.DAL;
@@ -18,6 +19,12 @@ namespace DivarClone.BLL
     public interface IAuthenticationBLL
     {
         UserDTO AuthenticateUser(string username, string password);
+
+        Task<bool> AssignUserRole(int userId, string roleName, bool updateExistingRole = false);
+
+        Task<bool> RemoveUserSpecialPermission(int userId, string permissionName);
+
+        Task<bool> GiveUserSpecialPermission(int userId, string permissionName);
     }
 
     public class AuthenticationBLL: IAuthenticationBLL
@@ -107,6 +114,24 @@ namespace DivarClone.BLL
 
             // Redirect to the login page or home page
             HttpContext.Current.Response.Redirect("~/Login.aspx");
+        }
+
+        public async Task<bool> AssignUserRole(int userId, string roleName, bool updateExistingRole = false)
+        {
+            await _authenticationDAL.AssignUserRole(userId, roleName, updateExistingRole);
+            return true;
+        }
+
+        public async Task<bool> RemoveUserSpecialPermission(int userId, string permissionName)
+        {
+            await _authenticationDAL.RemoveUserSpecialPermission(userId, permissionName);
+            return true;
+        }
+
+        public async Task<bool> GiveUserSpecialPermission(int userId, string permissionName)
+        {
+            await _authenticationDAL.GiveUserSpecialPermission((int)userId, permissionName);
+            return true;
         }
     }
 }

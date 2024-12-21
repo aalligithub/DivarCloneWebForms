@@ -52,6 +52,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AdminBLL.cs" />
     <Compile Include="AuthenticationBLL.cs" />
     <Compile Include="ListingBLL.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

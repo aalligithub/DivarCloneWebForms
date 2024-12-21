@@ -51,7 +51,7 @@ namespace DivarClone.DAL
                         var userDTO = new UserDTO()
                         {
                             Id = Convert.ToInt32(rdr["Id"]),
-                            Name = rdr["Name"].ToString(),
+                            Name = rdr["FirstName"].ToString(),
                             Username = rdr["Username"].ToString(),
                             Email = rdr["Email"].ToString(),
                             PhoneNumber = rdr["Phone"].ToString(),
@@ -60,10 +60,13 @@ namespace DivarClone.DAL
 
                         var permissions = rdr["Permissions"].ToString().Split(',');
 
+                        var userPermissions = new List<string>();
+
                         foreach (var permission in permissions)
                         {
-                            userDTO.Permissions.Add(permission);
+                            userPermissions.Add(permission);
                         }
+                        userDTO.Permissions = userPermissions;
 
                         users.Add(userDTO);
                     }
