@@ -9,11 +9,28 @@ namespace Shared
 {
     public class Logger
     {
-        private static readonly Logger _instance = new Logger();
+        private static Logger _instance;
+        private static readonly object _lock = new object();
 
         private Logger() { }
 
-        public static Logger Instance => _instance;
+        public static Logger Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    lock (_lock)
+                    {
+                        if (_instance == null)
+                        {
+                            _instance = new Logger();
+                        }
+                    }
+                }
+                return _instance;
+            }
+        }
 
         private static readonly string LogFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Logs/log.txt");
 
