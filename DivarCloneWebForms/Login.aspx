@@ -8,7 +8,7 @@
         <asp:TextBox ID="Email" runat="server" CssClass="form-control"></asp:TextBox>
 
         <label for="Password">پسورد</label>
-        <asp:TextBox ID="Password" runat="server" CssClass="form-control"></asp:TextBox>
+        <asp:TextBox ID="Password" runat="server" CssClass="form-control" TextMode="Password"></asp:TextBox>
     </div>
 
     <asp:Button ID="SubmitButton" runat="server" Text="ورود" CssClass="btn btn-primary" OnClick="SubmitButton_Click" />

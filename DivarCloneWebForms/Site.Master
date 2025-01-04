@@ -87,6 +87,13 @@
                 </div>
                 <%-- login --%>
 
+                <%-- user register --%>
+                <div id="Div6" class="row" runat="server">
+                    <asp:ContentPlaceHolder ID="RegisterPlaceHolder" runat="server">
+                    </asp:ContentPlaceHolder>
+                </div>
+                <%-- user register --%>
+
             </asp:ContentPlaceHolder>
             <hr />
             <footer>
