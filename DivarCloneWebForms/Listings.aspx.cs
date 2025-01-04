@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using DivarClone.BLL;
 using DivarClone.DAL;
+using System.Configuration;
 
 namespace DivarCloneWebForms
 {
@@ -16,7 +17,7 @@ namespace DivarCloneWebForms
             if (!IsPostBack)
             {
                 // Using Web.config for configuration
-                var connectionString = "Server=DESKTOP-OOJCK86;Database=DivarCloneV2;Trusted_Connection=True;MultipleActiveResultSets=true;Encrypt=false";
+                var connectionString = ConfigurationManager.ConnectionStrings["DivarCloneContextConnection"].ConnectionString;
 
                 var listingDAL = new ListingDAL(connectionString);
                 _listingBLL = new ListingBLL(listingDAL);

@@ -6,6 +6,7 @@ using DivarClone.DAL;
 using DivarClone.BLL;
 using System.IO;
 using Microsoft.Ajax.Utilities;
+using System.Configuration;
 
 namespace DivarCloneWebForms
 {
@@ -17,7 +18,7 @@ namespace DivarCloneWebForms
         {
             if (!IsPostBack)
             {
-                var connectionString = "Server=DESKTOP-OOJCK86;Database=DivarCloneV2;Trusted_Connection=True;MultipleActiveResultSets=true;Encrypt=false";
+                var connectionString = ConfigurationManager.ConnectionStrings["DivarCloneContextConnection"].ConnectionString;
 
                 var listingDAL = new ListingDAL(connectionString);
                 var _listingBLL = new ListingBLL(listingDAL);
@@ -28,7 +29,7 @@ namespace DivarCloneWebForms
 
         protected void SubmitButton_Click(object sender, EventArgs e)
         {
-            var connectionString = "Server=DESKTOP-OOJCK86;Database=DivarCloneV2;Trusted_Connection=True;MultipleActiveResultSets=true;Encrypt=false";
+            var connectionString = ConfigurationManager.ConnectionStrings["DivarCloneContextConnection"].ConnectionString;
 
             var listingDAL = new ListingDAL(connectionString);
             var _listingBLL = new ListingBLL(listingDAL);

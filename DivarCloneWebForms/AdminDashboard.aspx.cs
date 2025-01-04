@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.UI;
 using System.Web.UI.WebControls;
 using DivarClone.BLL;
 using DivarClone.DAL;
+using System.Configuration;
+
 
 namespace DivarCloneWebForms
 {
@@ -18,8 +16,7 @@ namespace DivarCloneWebForms
         {
             if (!IsPostBack)
             {
-                // Using Web.config for configuration
-                var connectionString = "Server=DESKTOP-OOJCK86;Database=DivarCloneV2;Trusted_Connection=True;MultipleActiveResultSets=true;Encrypt=false";
+                var connectionString = ConfigurationManager.ConnectionStrings["DivarCloneContextConnection"].ConnectionString;
 
                 var AdminDAL = new AdminDAL(connectionString);
                 _adminBLL = new AdminBLL(AdminDAL);
@@ -55,7 +52,7 @@ namespace DivarCloneWebForms
 
         protected void ChangeUserRole(int userId, string roleName)
         {
-            var connectionString = "Server=DESKTOP-OOJCK86;Database=DivarCloneV2;Trusted_Connection=True;MultipleActiveResultSets=true;Encrypt=false";
+            var connectionString = ConfigurationManager.ConnectionStrings["DivarCloneContextConnection"].ConnectionString;
 
             var AdminDAL = new AdminDAL(connectionString);
             _adminBLL = new AdminBLL(AdminDAL);
