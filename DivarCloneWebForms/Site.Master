@@ -45,54 +45,61 @@
                 <uc1:Navbar ID="Navbar1" runat="server" />
                 <%-- navbar --%>
 
-                <%-- user control --%>
-                <div id="PartialZoneUserControl" class="col-md-2">
-                    <%@ Register src="~/UserControlls/UserControl.ascx" tagname="UserControl" tagprefix="uc2" %>
-                    <uc2:usercontrol id="UserControl" runat="server" />
-                </div>
-                <%-- user control--%>
+                <div class="row">
 
-                <%-- listings --%>
-                <div id="Div5" class="row" runat="server">
-                    <asp:ContentPlaceHolder ID="AdminDashboardPlaceHolder" runat="server">
-                    </asp:ContentPlaceHolder>
-                </div>
-                <%-- listings --%>
+                    <%-- user control --%>
+                    <div id="PartialZoneUserControl" class="col-md-2 order-last mt-3">
+                        <%@ Register src="~/UserControlls/UserControl.ascx" tagname="UserControl" tagprefix="uc2" %>
+                        <uc2:usercontrol id="UserControl" runat="server" />
+                    </div>
+                    <%-- user control--%>
 
-                <%-- listings --%>
-                <div id="Div1" class="row" runat="server">
-                    <asp:ContentPlaceHolder ID="DynamicContent" runat="server">
-                    </asp:ContentPlaceHolder>
-                </div>
-                <%-- listings --%>
+                    <div class="col-md-10">
 
-                <%-- listing detail --%>
-                <div id="Div2" class="row" runat="server">
-                    <asp:ContentPlaceHolder ID="ContentPlaceHolder1" runat="server">
-                    </asp:ContentPlaceHolder>
-                </div>
-                <%-- listing detail--%>
+                        <%-- listings --%>
+                        <div id="Div5" class="row" runat="server">
+                            <asp:ContentPlaceHolder ID="AdminDashboardPlaceHolder" runat="server">
+                            </asp:ContentPlaceHolder>
+                        </div>
+                        <%-- listings --%>
 
-                <%-- create listing --%>
-                <div id="Div3" class="row" runat="server">
-                    <asp:ContentPlaceHolder ID="CreateListingPlaceHolder" runat="server">
-                    </asp:ContentPlaceHolder>
-                </div>
-                <%-- create listing --%>
+                        <%-- listings --%>
+                        <div id="Div1" class="row" runat="server">
+                            <asp:ContentPlaceHolder ID="DynamicContent" runat="server">
+                            </asp:ContentPlaceHolder>
+                        </div>
+                        <%-- listings --%>
 
-                <%-- login --%>
-                <div id="Div4" class="row" runat="server">
-                    <asp:ContentPlaceHolder ID="LoginPlaceHolder" runat="server">
-                    </asp:ContentPlaceHolder>
-                </div>
-                <%-- login --%>
+                        <%-- listing detail --%>
+                        <div id="Div2" class="row" runat="server">
+                            <asp:ContentPlaceHolder ID="ContentPlaceHolder1" runat="server">
+                            </asp:ContentPlaceHolder>
+                        </div>
+                        <%-- listing detail--%>
 
-                <%-- user register --%>
-                <div id="Div6" class="row" runat="server">
-                    <asp:ContentPlaceHolder ID="RegisterPlaceHolder" runat="server">
-                    </asp:ContentPlaceHolder>
+                        <%-- create listing --%>
+                        <div id="Div3" class="row" runat="server">
+                            <asp:ContentPlaceHolder ID="CreateListingPlaceHolder" runat="server">
+                            </asp:ContentPlaceHolder>
+                        </div>
+                        <%-- create listing --%>
+
+                        <%-- login --%>
+                        <div id="Div4" class="row" runat="server">
+                            <asp:ContentPlaceHolder ID="LoginPlaceHolder" runat="server">
+                            </asp:ContentPlaceHolder>
+                        </div>
+                        <%-- login --%>
+
+                        <%-- user register --%>
+                        <div id="Div6" class="row" runat="server">
+                            <asp:ContentPlaceHolder ID="RegisterPlaceHolder" runat="server">
+                            </asp:ContentPlaceHolder>
+                        </div>
+                        <%-- user register --%>
+
+                    </div>
                 </div>
-                <%-- user register --%>
 
             </asp:ContentPlaceHolder>
             <hr />

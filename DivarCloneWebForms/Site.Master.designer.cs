@@ -15,15 +15,6 @@ namespace DivarCloneWebForms
     {
 
         /// <summary>
-        /// Navbar1 control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::DivarCloneWebForms.navbar Navbar1;
-
-        /// <summary>
         /// MainContent control.
         /// </summary>
         /// <remarks>
@@ -33,6 +24,15 @@ namespace DivarCloneWebForms
         protected global::System.Web.UI.WebControls.ContentPlaceHolder MainContent;
 
         /// <summary>
+        /// Navbar1 control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::DivarCloneWebForms.navbar Navbar1;
+
+        /// <summary>
         /// UserControl control.
         /// </summary>
         /// <remarks>
@@ -40,6 +40,24 @@ namespace DivarCloneWebForms
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::DivarCloneWebForms.UserControlls.UserControl UserControl;
+
+        /// <summary>
+        /// Div5 control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl Div5;
+
+        /// <summary>
+        /// AdminDashboardPlaceHolder control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.ContentPlaceHolder AdminDashboardPlaceHolder;
 
         /// <summary>
         /// Div1 control.
@@ -105,12 +123,30 @@ namespace DivarCloneWebForms
         protected global::System.Web.UI.HtmlControls.HtmlGenericControl Div4;
 
         /// <summary>
-        /// ContentPlaceHolder2 control.
+        /// LoginPlaceHolder control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.ContentPlaceHolder ContentPlaceHolder2;
+        protected global::System.Web.UI.WebControls.ContentPlaceHolder LoginPlaceHolder;
+
+        /// <summary>
+        /// Div6 control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl Div6;
+
+        /// <summary>
+        /// RegisterPlaceHolder control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.ContentPlaceHolder RegisterPlaceHolder;
     }
 }
