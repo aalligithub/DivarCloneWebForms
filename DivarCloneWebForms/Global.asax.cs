@@ -9,6 +9,7 @@ using System.Web.Routing;
 using System.Web.Security;
 using System.Web.SessionState;
 using DivarClone.DAL;
+using System.Configuration;
 
 namespace DivarCloneWebForms
 {
@@ -21,7 +22,7 @@ namespace DivarCloneWebForms
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
 
-            PermissionCacheManager.LoadRolePermissions("Server=DESKTOP-OOJCK86;Database=DivarCloneV2;Trusted_Connection=True;MultipleActiveResultSets=true;Encrypt=false");
+            PermissionCacheManager.LoadRolePermissions(ConfigurationManager.ConnectionStrings["DivarCloneContextConnection"].ConnectionString);
             
         }
 
