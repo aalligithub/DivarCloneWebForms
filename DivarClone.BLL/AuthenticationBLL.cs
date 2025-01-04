@@ -36,6 +36,14 @@ namespace DivarClone.BLL
             _authenticationDAL = authenticationDAL;
         }
 
+        public bool SignUserUp(UserDTO user)
+        {
+            if (_authenticationDAL.SignUserUp(user))
+                return true;
+            else
+                return false; 
+        }
+
         public UserDTO AuthenticateUser(string userName, string password)
         {
             try

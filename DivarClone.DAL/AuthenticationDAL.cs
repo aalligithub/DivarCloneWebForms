@@ -78,7 +78,7 @@ namespace DivarClone.DAL
 
     public interface IAuthenticationDAL
     {
-        Task<bool> SignUserUp(UserDTO userDTO);
+        bool SignUserUp(UserDTO userDTO);
 
         UserDTO AuthenticateUser(string email, string password);
 
@@ -102,7 +102,7 @@ namespace DivarClone.DAL
             Constr = _connectionString;
         }
 
-        public async Task<bool> SignUserUp(UserDTO userDTO)
+        public bool SignUserUp(UserDTO userDTO)
         {
             using (var con = new SqlConnection(Constr))
             {
@@ -120,11 +120,11 @@ namespace DivarClone.DAL
                     cmd.Parameters.AddWithValue("@Phone", userDTO.PhoneNumber);
                     cmd.Parameters.AddWithValue("@Username", userDTO.Username);
 
-                    SqlDataReader rdr = await cmd.ExecuteReaderAsync();
+                    SqlDataReader rdr = cmd.ExecuteReader();
 
                     if (rdr.Read()) {
 
-                        await AssignUserRole(Convert.ToInt32(rdr["Id"]), roleName:"RegularUser");
+                        AssignUserRole(Convert.ToInt32(rdr["Id"]), roleName:"RegularUser");
 
                         return true;
                     }

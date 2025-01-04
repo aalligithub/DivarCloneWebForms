@@ -60,13 +60,13 @@ namespace DivarCloneWebForms
         protected global::System.Web.UI.WebControls.TextBox passwordFiled;
 
         /// <summary>
-        /// passwordRepeatFiled control.
+        /// passwordRepeatField control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox passwordRepeatFiled;
+        protected global::System.Web.UI.WebControls.TextBox passwordRepeatField;
 
         /// <summary>
         /// emailField control.

@@ -35,8 +35,8 @@
                                     </div>
 
                                     <div class="form-group m-4" style="box-shadow:0px 0px 2px gray;">
-                                        <label for="passwordRepeatFiled">تکرار پسورد</label>
-                                        <asp:TextBox ID="passwordRepeatFiled" runat="server" TextMode="Password" CssClass="form-control"></asp:TextBox>
+                                        <label for="passwordRepeatField">تکرار پسورد</label>
+                                        <asp:TextBox ID="passwordRepeatField" runat="server" TextMode="Password" CssClass="form-control"></asp:TextBox>
                                     </div>
                                 </div>
 
