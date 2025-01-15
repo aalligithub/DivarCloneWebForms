@@ -150,6 +150,7 @@
     <Content Include="Content\bootstrap.rtl.min.css" />
     <Content Include="Content\Site.css" />
     <Content Include="CreateNewListing.aspx" />
+    <Content Include="EditListing.aspx" />
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
     <Content Include="ListingDetail.aspx" />
@@ -242,6 +243,13 @@
     </Compile>
     <Compile Include="CreateNewListing.aspx.designer.cs">
       <DependentUpon>CreateNewListing.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="EditListing.aspx.cs">
+      <DependentUpon>EditListing.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="EditListing.aspx.designer.cs">
+      <DependentUpon>EditListing.aspx</DependentUpon>
     </Compile>
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>

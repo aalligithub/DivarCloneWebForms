@@ -22,20 +22,24 @@ namespace DivarClone.DAL
 
         bool InsertImagePathIntoDB(int? listingId, string PathToImageFTP, string fileHash);
 
-        Task<bool> UpdateListingAsync(ListingDTO listing);
+        //Task<bool> UpdateListingAsync(ListingDTO listing);
 
         Task<bool> MakeListingSecret(int? listingId);
 
-        Task<bool> DeleteListingImage(int imageId);
+        bool DeleteListingImage(int imageId);
+
+        bool UpdateListing(int imageId, ListingDTO listingDTO);
+
+        string GetImageFTPpath(int ImageId);
     }
 
     public class ListingDTO
     {
         public enum Category //enum تعریف کردیم که کتگوری فقط از اعضای از پیش تایین شده انتخاب شود
         {
-            Electronics,
-            Realstate,
-            Vehicles
+            Electronics = 0,
+            Realstate = 1,
+            Vehicles = 2
         }
 
         public int Id { get; set; }
@@ -214,38 +218,38 @@ namespace DivarClone.DAL
             }
         }
 
-        public async Task<bool> UpdateListingAsync(ListingDTO listing)
-        {
-            try
-            {
-                using (var con = new SqlConnection(Constr))
-                {
-                    con.Open();
+        //public async Task<bool> UpdateListingAsync(ListingDTO listing)
+        //{
+        //    try
+        //    {
+        //        using (var con = new SqlConnection(Constr))
+        //        {
+        //            con.Open();
 
-                    var cmd = new SqlCommand("SP_UpdateListing", con);
-                    cmd.CommandType = System.Data.CommandType.StoredProcedure;
+        //            var cmd = new SqlCommand("SP_UpdateListing", con);
+        //            cmd.CommandType = System.Data.CommandType.StoredProcedure;
 
-                    cmd.Parameters.AddWithValue("@Id", listing.Id);
-                    cmd.Parameters.AddWithValue("@Name", listing.Name);
-                    cmd.Parameters.AddWithValue("@Description", listing.Description);
-                    cmd.Parameters.AddWithValue("@Price", listing.Price);
-                    cmd.Parameters.AddWithValue("@Poster", listing.Poster);
-                    cmd.Parameters.AddWithValue("@Category", (int)listing.category);
-                    cmd.Parameters.AddWithValue("@DateTime", DateTime.Now);
+        //            cmd.Parameters.AddWithValue("@Id", listing.Id);
+        //            cmd.Parameters.AddWithValue("@Name", listing.Name);
+        //            cmd.Parameters.AddWithValue("@Description", listing.Description);
+        //            cmd.Parameters.AddWithValue("@Price", listing.Price);
+        //            cmd.Parameters.AddWithValue("@Poster", listing.Poster);
+        //            cmd.Parameters.AddWithValue("@Category", (int)listing.category);
+        //            cmd.Parameters.AddWithValue("@DateTime", DateTime.Now);
 
-                    await cmd.ExecuteNonQueryAsync();
+        //            await cmd.ExecuteNonQueryAsync();
 
-                    Logger.Instance.LogInfo($"Listing with ID {listing.Id} updated successfully.");
-                    return true;
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger.Instance.LogError(ex + $"Error updating listing with ID {listing.Id}");
+        //            Logger.Instance.LogInfo($"Listing with ID {listing.Id} updated successfully.");
+        //            return true;
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Logger.Instance.LogError(ex + $"Error updating listing with ID {listing.Id}");
 
-                return false;
-            }
-        }
+        //        return false;
+        //    }
+        //}
 
         public async Task<bool> MakeListingSecret(int? listingId)
         {
@@ -303,7 +307,7 @@ namespace DivarClone.DAL
             }
         }
 
-        public async Task<bool> DeleteListingImage(int imageId)
+        public bool DeleteListingImage(int imageId)
         {
             //this will work with a BLL method to delete the image from the ftp 
             using (var con = new SqlConnection(Constr))
@@ -312,15 +316,15 @@ namespace DivarClone.DAL
 
                 try
                 {
-                    var cmd = new SqlCommand("SP_DeleteListingImage", con);
+                    var cmd = new SqlCommand("[Listing].[SP_DeleteListingImage]", con);
 
                     cmd.CommandType = System.Data.CommandType.StoredProcedure;
 
                     cmd.Parameters.AddWithValue("@ImageId", imageId);
 
-                    await cmd.ExecuteNonQueryAsync();
+                    cmd.ExecuteNonQuery();
 
-                    return true ;
+                    return true;
                 }
                 catch (Exception ex)
                 {
@@ -328,7 +332,72 @@ namespace DivarClone.DAL
                     throw;
                 }
             }
+        }
 
+        public bool UpdateListing(int Id, ListingDTO listingDTO)
+        {
+            using (var con = new SqlConnection(Constr))
+            {
+                con.Open();
+
+                try
+                {
+                    var cmd = new SqlCommand("[Listing].[SP_UpdateListing]", con);
+
+                    cmd.CommandType = System.Data.CommandType.StoredProcedure;
+
+                    cmd.Parameters.AddWithValue("@Id", Id);
+                    cmd.Parameters.AddWithValue("@Name", listingDTO.Name);
+                    cmd.Parameters.AddWithValue("@Description", listingDTO.Description);
+                    cmd.Parameters.AddWithValue("@Price", listingDTO.Price);
+                    cmd.Parameters.AddWithValue("@Category", listingDTO.category);
+                    cmd.Parameters.AddWithValue("@DateTime", DateTime.Now);
+
+                    cmd.ExecuteNonQuery();
+
+                    Logger.Instance.LogInfo($"Listing with ID {Id} updated successfully.");
+
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    Logger.Instance.LogError(ex + " ListingDAL UpdateListing");
+                    return false;
+                }
+            }
+        }
+
+        public string GetImageFTPpath(int ImageId)
+        {
+            string path = "";
+
+            using (var con = new SqlConnection(Constr))
+            {
+                con.Open();
+
+                try
+                {
+                    var cmd = new SqlCommand("[Listing].[SP_GetImageFTPpath]", con);
+
+                    cmd.CommandType = System.Data.CommandType.StoredProcedure;
+
+                    cmd.Parameters.AddWithValue("@ImageId", ImageId);
+
+                    using (var rdr = cmd.ExecuteReader())
+                    {
+                        while (rdr.Read()) {
+                            path = rdr["ImagePath"].ToString();
+                        }
+                    }
+
+                    return path;
+                }
+                catch (Exception ex)
+                {
+                    Logger.Instance.LogError(ex + " ListingDAL GetImageFTPpath");
+                    throw ex;
+                }
+            }
         }
     }
 }

@@ -98,6 +98,13 @@
                         </div>
                         <%-- user register --%>
 
+                        <%-- edit listing --%>
+                        <div id="Div7" class="row" runat="server">
+                            <asp:ContentPlaceHolder ID="EditListingPlaceHolder" runat="server">
+                            </asp:ContentPlaceHolder>
+                        </div>
+                        <%-- edit listing --%>
+
                     </div>
                 </div>
 
