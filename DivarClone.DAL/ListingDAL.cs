@@ -16,7 +16,7 @@ namespace DivarClone.DAL
 
         List<ListingDTO> MapJoinedListingToDTO(SqlDataReader mergedReader, bool hasImages);
 
-        Task<bool> DeleteListing(int id);
+        bool DeleteListing(int id);
 
         int? CreateListingAsync(ListingDTO listing);
 
@@ -278,7 +278,7 @@ namespace DivarClone.DAL
             return true;
         }
 
-        public async Task<bool> DeleteListing(int id)
+        public bool DeleteListing(int id)
         {
             try
             {
@@ -292,7 +292,7 @@ namespace DivarClone.DAL
                     cmd.CommandType = System.Data.CommandType.StoredProcedure;
                     cmd.Parameters.AddWithValue("@Id", id);
 
-                    await cmd.ExecuteNonQueryAsync();
+                    cmd.ExecuteNonQuery();
 
                     // this method doesnt handle ftp operations but make sure images are removed from ftp aswell in the BLL
 

@@ -40,6 +40,8 @@ namespace DivarClone.BLL
         bool UpdateListing(int imageId, ListingDTO listingDTO);
 
         bool DeleteListingImage(int imageId);
+
+        bool DeleteListing(int listingId);
     }
 
 
@@ -283,6 +285,20 @@ namespace DivarClone.BLL
                     Logger.Instance.LogError($"{ex.Message} couldnt connect to FTP ");
                     return false;
                 }
+            }
+        }
+
+        public bool DeleteListing(int listingId)
+        {
+            try
+            {
+                _listingDAL.DeleteListing(listingId);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Logger.Instance.LogError(ex + " ListingBLL DeleteListing");
+                return false;
             }
         }
     }
