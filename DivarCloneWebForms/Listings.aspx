@@ -34,7 +34,7 @@
                         </div>
 
                         <div class="card-footer">
-                            <asp:Button runat="server" OnClick="DeleteImageButton_Click" CommandArgument='<%# Eval("Id") %>' Text="حذف عکس"/>
+                            <asp:Button runat="server" OnClick="DeleteImageButton_Click" CommandArgument='<%# Eval("Id") %>' Text="حذف"/>
                             <asp:Button runat="server" Text="ویرایش" PostBackUrl='<%# "~/EditListing.aspx?Id=" + Eval("Id") %>'/>
                         </div>
                     </div>

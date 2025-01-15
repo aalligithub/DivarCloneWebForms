@@ -288,7 +288,7 @@ namespace DivarClone.DAL
                 {
                     con.Open();
 
-                    var cmd = new SqlCommand("SP_DeleteListing", con);
+                    var cmd = new SqlCommand("[Listing].[SP_DeleteListing]", con);
                     cmd.CommandType = System.Data.CommandType.StoredProcedure;
                     cmd.Parameters.AddWithValue("@Id", id);
 
