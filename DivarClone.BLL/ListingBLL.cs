@@ -36,6 +36,10 @@ namespace DivarClone.BLL
         int? CreateListingAsync(ListingDTO listingDTO);
 
         bool InsertImagePathIntoDB(int? listingId, string PathToImageFTP, string fileHash);
+
+        bool UpdateListing(int imageId, ListingDTO listingDTO);
+
+        bool DeleteListingImage(int imageId);
     }
 
 
@@ -238,5 +242,48 @@ namespace DivarClone.BLL
             return true;
         }
 
+        public bool UpdateListing(int imageId, ListingDTO listingDTO)
+        {
+            try
+            {
+                _listingDAL.UpdateListing(imageId, listingDTO);
+                return true;
+            }
+            catch (Exception ex) {
+                Logger.Instance.LogError(ex + "ListingBLL UpdateListing");
+                return false;
+            }
+        }
+
+        public bool DeleteListingImage(int imageId)
+        {
+            using (var client = new FtpClient("127.0.0.1", "Ali", "Ak362178"))
+            {
+                try
+                {
+                    client.AutoConnect();
+
+                    try
+                    {
+                        client.DeleteFile(_listingDAL.GetImageFTPpath(imageId));
+
+                        _listingDAL.DeleteListingImage(imageId);
+                    }
+                    catch
+                    {
+                        return false;
+                    }
+
+                    Logger.Instance.LogInfo("Image download success");
+                    return true;
+
+                }
+                catch (Exception ex)
+                {
+                    Logger.Instance.LogError($"{ex.Message} couldnt connect to FTP ");
+                    return false;
+                }
+            }
+        }
     }
 }
