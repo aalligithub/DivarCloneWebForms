@@ -1,4 +1,5 @@
 ﻿<%@ Page Language="C#" MasterPageFile="Site.Master" AutoEventWireup="true" CodeBehind="AdminDashboard.aspx.cs" Inherits="DivarCloneWebForms.AdminDashboard" %>
+<%@ Import Namespace="DivarCloneWebForms" %>
 
 <asp:Content ID="AdminDashboard" ContentPlaceHolderID="AdminDashboardPlaceHolder" runat="server">
     <div class="container mt-4" id="adminDash">
@@ -38,7 +39,17 @@
                             ))
                         %>
                     </div>
-               
+
+                    <!-- Inner Repeater for Permissions -->
+                    <div class="mt-2 mb-2 border rounded p-2" style="background-color:lightgray;">
+                        <h6 class="fw-bold">کاربر این اجازه ها را ندارد :</h6>
+                        <asp:Repeater ID="rptRolesPermissions" runat="server">
+                            <ItemTemplate>
+                               <asp:Button ID="btnAddPermission" runat="server" Text="<%# Container.DataItem %>" BackColor="Red" ForeColor="White" BorderColor="Transparent"/>
+                            </ItemTemplate>
+                        </asp:Repeater>
+                    </div>
+
                     <asp:Button ID="btnAdmin" runat="server" Text="Admin"
                         OnClick="ChangeUserRole_Click" CommandArgument='<%# Eval("Id") + ",Admin" %>' />
 
@@ -46,7 +57,7 @@
                         OnClick="ChangeUserRole_Click" CommandArgument='<%# Eval("Id") + ",RegularUser" %>' />
 
                     <asp:Button ID="btnPrivilegedUser" runat="server" Text="Privileged User"
-                        OnClick="ChangeUserRole_Click" CommandArgument='<%# Eval("Id") + ",PrivilegedUser" %>' />
+                        OnClick="ChangeUserRole_Click" CommandArgument='<%# Eval("Id") + ",PrivilagedUser" %>' />
 
                     <asp:Button ID="btnBlankUser" runat="server" Text="Blank User"
                         OnClick="ChangeUserRole_Click" CommandArgument='<%# Eval("Id") + ",BlankUser" %>' />
@@ -56,6 +67,7 @@
         </li>
     </ItemTemplate>
 </asp:Repeater>
+
 
 
     </ol>

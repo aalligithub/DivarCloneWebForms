@@ -82,7 +82,7 @@ namespace DivarClone.DAL
 
         UserDTO AuthenticateUser(string email, string password);
 
-        Task<bool> AssignUserRole(int userId, string roleName, bool updateExistingRole = false);
+        bool AssignUserRole(int userId, string roleName, bool updateExistingRole = false);
 
         Task<bool> GiveUserSpecialPermission(int userId, string permissionName);
 
@@ -197,7 +197,7 @@ namespace DivarClone.DAL
             }
         }
 
-        public async Task<bool> AssignUserRole(int userId, string roleName, bool updateExistingRole = false)
+        public bool AssignUserRole(int userId, string roleName, bool updateExistingRole = false)
         {
             // permissions are fetched seprately per role not per user
             using (var con = new SqlConnection(Constr))
@@ -218,7 +218,7 @@ namespace DivarClone.DAL
                     cmd.Parameters.AddWithValue("@UserId", userId);
                     cmd.Parameters.AddWithValue("@RoleName", roleName);
 
-                    await cmd.ExecuteNonQueryAsync();
+                    cmd.ExecuteNonQuery();
 
                     return true;
                 }

@@ -20,7 +20,7 @@ namespace DivarClone.BLL
     {
         UserDTO AuthenticateUser(string username, string password);
 
-        Task<bool> AssignUserRole(int userId, string roleName, bool updateExistingRole = false);
+        bool AssignUserRole(int userId, string roleName, bool updateExistingRole = false);
 
         Task<bool> RemoveUserSpecialPermission(int userId, string permissionName);
 
@@ -124,9 +124,9 @@ namespace DivarClone.BLL
             HttpContext.Current.Response.Redirect("~/Login.aspx");
         }
 
-        public async Task<bool> AssignUserRole(int userId, string roleName, bool updateExistingRole = false)
+        public bool AssignUserRole(int userId, string roleName, bool updateExistingRole = false)
         {
-            await _authenticationDAL.AssignUserRole(userId, roleName, updateExistingRole);
+            _authenticationDAL.AssignUserRole(userId, roleName, updateExistingRole);
             return true;
         }
 

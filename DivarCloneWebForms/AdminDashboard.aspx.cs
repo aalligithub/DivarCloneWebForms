@@ -3,6 +3,7 @@ using System.Web.UI.WebControls;
 using DivarClone.BLL;
 using DivarClone.DAL;
 using System.Configuration;
+using System.Linq;
 
 
 namespace DivarCloneWebForms
@@ -24,10 +25,9 @@ namespace DivarCloneWebForms
                 var AuthenticationDAL = new AuthenticationDAL(connectionString);
                 _authenticationBLL = new AuthenticationBLL(AuthenticationDAL);
 
+                rptUsers.ItemDataBound += rptUsers_ItemDataBound;
+
                 BindUsers();
-
-                // Roles and Permissions for dropdowns
-
             }
         }
 
@@ -37,6 +37,31 @@ namespace DivarCloneWebForms
             rptUsers.DataSource = users;
             rptUsers.DataBind();
         }
+
+        protected void rptUsers_ItemDataBound(object sender, RepeaterItemEventArgs e)
+        {
+            if (e.Item.ItemType == ListItemType.Item || e.Item.ItemType == ListItemType.AlternatingItem)
+            {
+                // Get the current UserDTO
+                var userDto = (UserDTO)e.Item.DataItem;
+
+                // Find the inner repeater
+                var rptRolesPermissions = (Repeater)e.Item.FindControl("rptRolesPermissions");
+
+                if (rptRolesPermissions != null)
+                {
+                    // Calculate the permissions the user lacks
+                    var userPermissions = userDto.Permissions; // List of user's current permissions
+                    var allAdminPermissions = PermissionCacheManager.RolePermissionsCache["Admin"]; // All admin permissions
+                    var lackingPermissions = allAdminPermissions.Except(userPermissions).ToList();
+
+                    // Bind the lacking permissions to the inner repeater
+                    rptRolesPermissions.DataSource = lackingPermissions;
+                    rptRolesPermissions.DataBind();
+                }
+            }
+        }
+
 
         protected void ChangeUserRole_Click(object sender, EventArgs e)
         {
