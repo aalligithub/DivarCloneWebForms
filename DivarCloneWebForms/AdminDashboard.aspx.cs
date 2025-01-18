@@ -4,6 +4,7 @@ using DivarClone.BLL;
 using DivarClone.DAL;
 using System.Configuration;
 using System.Linq;
+using System.Collections.Generic;
 
 
 namespace DivarCloneWebForms
@@ -34,8 +35,9 @@ namespace DivarCloneWebForms
         private void BindUsers()
         {
             var users = _adminBLL.GetAllUsers();
-            rptUsers.DataSource = users;
-            rptUsers.DataBind();
+
+            rptUsers.DataSource = users; // list of UserDTOs
+            rptUsers.DataBind(); //Id is bound here
         }
 
         protected void rptUsers_ItemDataBound(object sender, RepeaterItemEventArgs e)
@@ -57,11 +59,21 @@ namespace DivarCloneWebForms
 
                     // Bind the lacking permissions to the inner repeater
                     rptRolesPermissions.DataSource = lackingPermissions;
-                    rptRolesPermissions.DataBind();
+                    rptRolesPermissions.DataBind(); // this is the inner repeater
+
+                    // Store the user ID for later use
+                    foreach (RepeaterItem item in rptRolesPermissions.Items)
+                    {
+                        var btnAddPermission = (Button)item.FindControl("btnAddPermission");
+                        if (btnAddPermission != null)
+                        {
+                            btnAddPermission.CommandArgument = $"{userDto.Id},{btnAddPermission.CommandArgument}";
+                        }
+                    }
+
                 }
             }
         }
-
 
         protected void ChangeUserRole_Click(object sender, EventArgs e)
         {
@@ -86,6 +98,25 @@ namespace DivarCloneWebForms
             _authenticationBLL = new AuthenticationBLL(AuthenticationDAL);
 
             _authenticationBLL.AssignUserRole(userId, roleName, true);
+        }
+
+        protected void GiveUserPermission_Click(object sender, EventArgs e)
+        {
+            var connectionString = ConfigurationManager.ConnectionStrings["DivarCloneContextConnection"].ConnectionString;
+
+            var AdminDAL = new AdminDAL(connectionString);
+            _adminBLL = new AdminBLL(AdminDAL);
+
+            var AuthenticationDAL = new AuthenticationDAL(connectionString);
+            _authenticationBLL = new AuthenticationBLL(AuthenticationDAL);
+
+            var button = (Button)sender;
+            var commandArgs = button.CommandArgument.Split(',');
+
+            int userId = int.Parse(commandArgs[0]); // User ID from HiddenField
+            string permissionName = commandArgs[1]; // Permission name from Container.DataItem
+
+            _authenticationBLL.GiveUserSpecialPermission(userId, permissionName);
         }
     }
 }

@@ -19,6 +19,9 @@
     <ItemTemplate>
         <li class="list-group-item d-flex justify-content-between align-items-start py-3 border-bottom">
             <div class="ms-2">
+
+                <asp:HiddenField ID="hfUserId" runat="server" Value='<%# Eval("Id") %>' />
+
                 <h5 class="fw-bold"><%# Eval("Username") %></h5>
                 <p class="mb-1">
                     <i class="bi bi-envelope-fill"></i> ایمیل: <%# Eval("Email") %>
@@ -27,25 +30,29 @@
                     <i class="bi bi-person-badge-fill"></i> نقش: 
                     <span class="badge bg-info text-dark"><%# Eval("Role") %></span>
                 </p>
+                <p class="mb-1">
+                    <i class="bi bi-person-badge-fill"></i> ID: 
+                    <span id="userId" class="badge bg-info text-dark"><%# Eval("Id") %></span>
+                </p>
 
                 <!-- Permissions -->
                 <div class="mt-2">
                     <h6 class="fw-bold">اجازه ها:</h6>
                     <div class="border rounded p-2" style="background-color:lightgray;">
                         <%# 
-                            string.Join(" ", 
+                            string.Join(" ",
                             ((List<string>)Eval("Permissions")).Select(p =>
                                 $"<span class='badge bg-primary text-white me-1' style='font-size: 0.90rem;'>{p}</span>"
                             ))
                         %>
                     </div>
 
-                    <!-- Inner Repeater for Permissions -->
                     <div class="mt-2 mb-2 border rounded p-2" style="background-color:lightgray;">
+
                         <h6 class="fw-bold">کاربر این اجازه ها را ندارد :</h6>
                         <asp:Repeater ID="rptRolesPermissions" runat="server">
                             <ItemTemplate>
-                               <asp:Button ID="btnAddPermission" runat="server" Text="<%# Container.DataItem %>" BackColor="Red" ForeColor="White" BorderColor="Transparent"/>
+                               <asp:Button ID="btnAddPermission" runat="server" Text="<%# Container.DataItem %>" BackColor="Red" ForeColor="White" BorderColor="Transparent" OnClick="GiveUserPermission_Click" CommandArgument='<%# Container.DataItem %>'/>
                             </ItemTemplate>
                         </asp:Repeater>
                     </div>
@@ -76,4 +83,5 @@
 
         </div>
     </div>
+
 </asp:Content>

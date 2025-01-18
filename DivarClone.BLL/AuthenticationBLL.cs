@@ -24,7 +24,7 @@ namespace DivarClone.BLL
 
         Task<bool> RemoveUserSpecialPermission(int userId, string permissionName);
 
-        Task<bool> GiveUserSpecialPermission(int userId, string permissionName);
+        bool GiveUserSpecialPermission(int userId, string permissionName);
     }
 
     public class AuthenticationBLL: IAuthenticationBLL
@@ -136,9 +136,9 @@ namespace DivarClone.BLL
             return true;
         }
 
-        public async Task<bool> GiveUserSpecialPermission(int userId, string permissionName)
+        public bool GiveUserSpecialPermission(int userId, string permissionName)
         {
-            await _authenticationDAL.GiveUserSpecialPermission((int)userId, permissionName);
+            _authenticationDAL.GiveUserSpecialPermission((int)userId, permissionName);
             return true;
         }
     }

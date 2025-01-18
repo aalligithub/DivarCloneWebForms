@@ -25,7 +25,9 @@ namespace DivarClone.DAL
 
         public string Role { get; set; }
 
-        public List<string> Permissions { get; set; } 
+        public List<string> Permissions { get; set; }
+
+        public List<string> SpecialPermission { get; set; }
     }
 
     // this is for scalability if we have a huge number of users
@@ -84,7 +86,7 @@ namespace DivarClone.DAL
 
         bool AssignUserRole(int userId, string roleName, bool updateExistingRole = false);
 
-        Task<bool> GiveUserSpecialPermission(int userId, string permissionName);
+        bool GiveUserSpecialPermission(int userId, string permissionName);
 
         Task<bool> RemoveUserSpecialPermission(int userId, string permissionName);
     }
@@ -230,7 +232,7 @@ namespace DivarClone.DAL
             }
         }
 
-        public async Task<bool> GiveUserSpecialPermission(int userId, string permissionName)
+        public bool GiveUserSpecialPermission(int userId, string permissionName)
         {
             using (var con = new SqlConnection(Constr))
             {
@@ -246,7 +248,7 @@ namespace DivarClone.DAL
                     cmd.Parameters.AddWithValue("@UserId", userId);
                     cmd.Parameters.AddWithValue("@PermissionName", permissionName);
 
-                    await cmd.ExecuteNonQueryAsync();
+                    cmd.ExecuteNonQuery();
 
                     return true;
                 }
