@@ -254,7 +254,7 @@ namespace DivarClone.DAL
                 }
                 catch (Exception ex)
                 {
-                    Logger.Instance.LogError($"Connection to Database failed : {ex}");
+                    Logger.Instance.LogError($"User already has this permission : {ex}");
                     return false;
                 }
             }

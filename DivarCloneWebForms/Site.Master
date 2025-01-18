@@ -84,6 +84,13 @@
                         </div>
                         <%-- create listing --%>
 
+                        <%-- create secret listing --%>
+                        <div id="Div8" class="row" runat="server">
+                            <asp:ContentPlaceHolder ID="CreateSecretListingPlaceHolder" runat="server">
+                            </asp:ContentPlaceHolder>
+                        </div>
+                        <%-- create secret listing --%>
+
                         <%-- login --%>
                         <div id="Div4" class="row" runat="server">
                             <asp:ContentPlaceHolder ID="LoginPlaceHolder" runat="server">

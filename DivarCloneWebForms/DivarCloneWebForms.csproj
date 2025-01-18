@@ -186,6 +186,7 @@
     <Content Include="Content\bootstrap-grid.min.css.map" />
     <Content Include="Content\bootstrap-grid.css.map" />
     <Content Include="Listings.aspx" />
+    <Content Include="CreateNewSecretListing.aspx" />
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
     <Content Include="Scripts\jquery-3.7.0.min.js" />
@@ -317,6 +318,13 @@
     </Compile>
     <Compile Include="Listings.aspx.designer.cs">
       <DependentUpon>Listings.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="CreateNewSecretListing.aspx.cs">
+      <DependentUpon>CreateNewSecretListing.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="CreateNewSecretListing.aspx.designer.cs">
+      <DependentUpon>CreateNewSecretListing.aspx</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>

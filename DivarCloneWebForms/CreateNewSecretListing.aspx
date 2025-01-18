@@ -1,6 +1,6 @@
-﻿<%@ Page Language="C#" MasterPageFile="Site.Master" AutoEventWireup="true" CodeBehind="CreateNewListing.aspx.cs" Inherits="DivarCloneWebForms.CreateNewListing" %>
+﻿<%@ Page Language="C#" MasterPageFile="Site.Master" AutoEventWireup="true" CodeBehind="CreateNewSecretListing.aspx.cs" Inherits="DivarCloneWebForms.CreateNewListing" %>
 
-<asp:Content ID="CreateListingID" ContentPlaceHolderID="CreateListingPlaceHolder" runat="server">
+<asp:Content ID="CreateSecretListingID" ContentPlaceHolderID="CreateSecretListingPlaceHolder" runat="server">
     <style>
         .custom-file-upload {
             display: inline-block;
@@ -39,7 +39,7 @@
     </script>
 
     <div class="container" style="height: 85vh;">
-        <h4 class="mb-3">ثبت آگهی</h4>
+        <h4 class="mb-3">ثبت آگهی محرمانه</h4>
         <asp:Panel ID="Panel1" runat="server">
 
             <asp:Label ID="ErrorLabel" runat="server"></asp:Label>

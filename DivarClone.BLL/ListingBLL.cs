@@ -35,6 +35,8 @@ namespace DivarClone.BLL
 
         int? CreateListingAsync(ListingDTO listingDTO);
 
+        int? CreateSecretListingAsync(ListingDTO listingDTO);
+
         bool InsertImagePathIntoDB(int? listingId, string PathToImageFTP, string fileHash);
 
         bool UpdateListing(int imageId, ListingDTO listingDTO);
@@ -107,6 +109,11 @@ namespace DivarClone.BLL
         public int? CreateListingAsync(ListingDTO listingDTO)
         {
             return _listingDAL.CreateListingAsync(listingDTO);
+        }
+
+        public int? CreateSecretListingAsync(ListingDTO listingDTO)
+        {
+            return _listingDAL.CreateSecretListingAsync(listingDTO);
         }
 
         public async Task<string> ComputeHash(string toHash)

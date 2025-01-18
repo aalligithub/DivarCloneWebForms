@@ -20,6 +20,8 @@ namespace DivarClone.DAL
 
         int? CreateListingAsync(ListingDTO listing);
 
+        int? CreateSecretListingAsync(ListingDTO listing);
+
         bool InsertImagePathIntoDB(int? listingId, string PathToImageFTP, string fileHash);
 
         //Task<bool> UpdateListingAsync(ListingDTO listing);
@@ -179,6 +181,37 @@ namespace DivarClone.DAL
                     cmd.Parameters.AddWithValue("@DateTimeOfPosting", DateTime.Now);
 
                     int newListingId = Convert.ToInt32( cmd.ExecuteScalar());
+
+                    System.Diagnostics.Debug.WriteLine("New Listing Created with Listing Id : " + newListingId);
+                    return newListingId;
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Instance.LogError(ex + "Error creating listing");
+                throw ex;
+            }
+        }
+
+        public int? CreateSecretListingAsync(ListingDTO listing)
+        {
+            try
+            {
+                using (var con = new SqlConnection(Constr))
+                {
+                    con.Open();
+
+                    var cmd = new SqlCommand("[Listing].[SP_CreateSecretListing]", con);
+                    cmd.CommandType = System.Data.CommandType.StoredProcedure;
+
+                    cmd.Parameters.AddWithValue("@Name", listing.Name);
+                    cmd.Parameters.AddWithValue("@Description", listing.Description);
+                    cmd.Parameters.AddWithValue("@Price", listing.Price);
+                    cmd.Parameters.AddWithValue("@Poster", listing.Poster);
+                    cmd.Parameters.AddWithValue("@Category", (int)listing.category);
+                    cmd.Parameters.AddWithValue("@DateTimeOfPosting", DateTime.Now);
+
+                    int newListingId = Convert.ToInt32(cmd.ExecuteScalar());
 
                     System.Diagnostics.Debug.WriteLine("New Listing Created with Listing Id : " + newListingId);
                     return newListingId;
