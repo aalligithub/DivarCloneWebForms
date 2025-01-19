@@ -11,6 +11,7 @@ namespace DivarClone.BLL
     public interface IAdminBLL
     {
         List<UserDTO> GetAllUsers(
+            int? userId = null,
             string username = null,
             string email = null,
             string permissionName = null,
@@ -26,6 +27,7 @@ namespace DivarClone.BLL
         }
 
         public List<UserDTO> GetAllUsers(
+            int? userId = null,
             string username = null,
             string email = null,
             string permissionName = null,
@@ -33,7 +35,7 @@ namespace DivarClone.BLL
         {
             try
             {
-                var users = new List<UserDTO>(_adminDAL.GetAllUsers());
+                var users = new List<UserDTO>(_adminDAL.GetAllUsers(userId,username,email,permissionName,roleName));
 
                 return users;
             }

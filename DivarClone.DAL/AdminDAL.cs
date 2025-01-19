@@ -10,7 +10,7 @@ namespace DivarClone.DAL
 {
     public interface IAdminDAL
     {
-        List<UserDTO> GetAllUsers(string username = null, string email = null, string permissionName = null, string roleName = null);
+        List<UserDTO> GetAllUsers(int? userId = null, string username = null, string email = null, string permissionName = null, string roleName = null);
     }
     public class AdminDAL : IAdminDAL
     {
@@ -25,7 +25,7 @@ namespace DivarClone.DAL
             Constr = _connectionString;
         }
 
-        public List<UserDTO> GetAllUsers(string username = null, string email = null, string permissionName = null, string roleName = null)
+        public List<UserDTO> GetAllUsers(int? userId = null, string username = null, string email = null, string permissionName = null, string roleName = null)
         {
             var users = new List<UserDTO>();
 
@@ -39,6 +39,7 @@ namespace DivarClone.DAL
 
                     cmd.CommandType = System.Data.CommandType.StoredProcedure;
 
+                    if (userId != null) cmd.Parameters.AddWithValue("@UserId", userId);
                     if (!string.IsNullOrEmpty(username)) cmd.Parameters.AddWithValue("@Username", username);
                     if (!string.IsNullOrEmpty(email)) cmd.Parameters.AddWithValue("@Email", email);
                     if (!string.IsNullOrEmpty(permissionName)) cmd.Parameters.AddWithValue("@PermissionName", permissionName);
