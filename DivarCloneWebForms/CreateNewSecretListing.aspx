@@ -1,4 +1,4 @@
-﻿<%@ Page Language="C#" MasterPageFile="Site.Master" AutoEventWireup="true" CodeBehind="CreateNewSecretListing.aspx.cs" Inherits="DivarCloneWebForms.CreateNewListing" %>
+﻿<%@ Page Language="C#" MasterPageFile="Site.Master" AutoEventWireup="true" CodeBehind="CreateNewSecretListing.aspx.cs" Inherits="DivarCloneWebForms.CreateNewSecretListing" %>
 
 <asp:Content ID="CreateSecretListingID" ContentPlaceHolderID="CreateSecretListingPlaceHolder" runat="server">
     <style>

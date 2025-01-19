@@ -8,7 +8,7 @@ using System.Configuration;
 
 namespace DivarCloneWebForms
 {
-    public partial class WebForm1 : System.Web.UI.Page
+    public partial class CreateNewSecretListing : System.Web.UI.Page
     {
         private IListingBLL _listingBLL;
 
@@ -87,7 +87,7 @@ namespace DivarCloneWebForms
                     DateTimeOfPosting = DateTime.Now,
                 };
 
-                listingId = _listingBLL.CreateListingAsync(listing);
+                listingId = _listingBLL.CreateSecretListingAsync(listing);
 
                 SuccessLabel.Text = "Listing submitted successfully!";
             }

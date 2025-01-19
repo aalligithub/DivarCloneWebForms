@@ -18,23 +18,33 @@ namespace DivarCloneWebForms
         {
             if (!IsPostBack)
             {
-                var connectionString = ConfigurationManager.ConnectionStrings["DivarCloneContextConnection"].ConnectionString;
-
-                var AdminDAL = new AdminDAL(connectionString);
-                _adminBLL = new AdminBLL(AdminDAL);
-
-                var AuthenticationDAL = new AuthenticationDAL(connectionString);
-                _authenticationBLL = new AuthenticationBLL(AuthenticationDAL);
-
                 rptUsers.ItemDataBound += rptUsers_ItemDataBound;
 
                 BindUsers();
             }
         }
 
-        private void BindUsers()
+        private void InitializeDependencies()
         {
-            var users = _adminBLL.GetAllUsers();
+            var connectionString = ConfigurationManager.ConnectionStrings["DivarCloneContextConnection"].ConnectionString;
+
+            var AdminDAL = new AdminDAL(connectionString);
+            _adminBLL = new AdminBLL(AdminDAL);
+
+            var AuthenticationDAL = new AuthenticationDAL(connectionString);
+            _authenticationBLL = new AuthenticationBLL(AuthenticationDAL);
+        }
+
+        private void BindUsers(
+            int? userId = null,
+            string username = null,
+            string email = null,
+            string permissionName = null,
+            string roleName = null)
+        {
+            InitializeDependencies();
+
+            var users = _adminBLL.GetAllUsers(userId,username,email,permissionName,roleName);
 
             rptUsers.DataSource = users; // list of UserDTOs
             rptUsers.DataBind(); //Id is bound here
@@ -105,31 +115,16 @@ namespace DivarCloneWebForms
             int userId = int.Parse(args[0]);
             string role = args[1];
 
-            ChangeUserRole(userId, role);
-        }
+            InitializeDependencies();
+            _authenticationBLL.AssignUserRole(userId, role, true);
 
-        protected void ChangeUserRole(int userId, string roleName)
-        {
-            var connectionString = ConfigurationManager.ConnectionStrings["DivarCloneContextConnection"].ConnectionString;
-
-            var AdminDAL = new AdminDAL(connectionString);
-            _adminBLL = new AdminBLL(AdminDAL);
-
-            var AuthenticationDAL = new AuthenticationDAL(connectionString);
-            _authenticationBLL = new AuthenticationBLL(AuthenticationDAL);
-
-            _authenticationBLL.AssignUserRole(userId, roleName, true);
+            rptUsers.ItemDataBound += rptUsers_ItemDataBound;
+            BindUsers(userId);
         }
 
         protected void GiveUserPermission_Click(object sender, EventArgs e)
         {
-            var connectionString = ConfigurationManager.ConnectionStrings["DivarCloneContextConnection"].ConnectionString;
-
-            var AdminDAL = new AdminDAL(connectionString);
-            _adminBLL = new AdminBLL(AdminDAL);
-
-            var AuthenticationDAL = new AuthenticationDAL(connectionString);
-            _authenticationBLL = new AuthenticationBLL(AuthenticationDAL);
+            InitializeDependencies();
 
             var button = (Button)sender;
             var commandArgs = button.CommandArgument.Split(',');
@@ -138,17 +133,14 @@ namespace DivarCloneWebForms
             string permissionName = commandArgs[1]; // Permission name from Container.DataItem
 
             _authenticationBLL.GiveUserSpecialPermission(userId, permissionName);
+
+            rptUsers.ItemDataBound += rptUsers_ItemDataBound;
+            BindUsers(userId);
         }
 
         protected void RemoveUserSpecialPermission_Click(object sender, EventArgs e)
         {
-            var connectionString = ConfigurationManager.ConnectionStrings["DivarCloneContextConnection"].ConnectionString;
-
-            var AdminDAL = new AdminDAL(connectionString);
-            _adminBLL = new AdminBLL(AdminDAL);
-
-            var AuthenticationDAL = new AuthenticationDAL(connectionString);
-            _authenticationBLL = new AuthenticationBLL(AuthenticationDAL);
+            InitializeDependencies();
 
             var button = (Button)sender;
             var commandArgs = button.CommandArgument.Split(',');
@@ -157,6 +149,9 @@ namespace DivarCloneWebForms
             string permissionName = commandArgs[1]; // Permission name from Container.DataItem
 
             _authenticationBLL.RemoveUserSpecialPermission(userId, permissionName);
+
+            rptUsers.ItemDataBound += rptUsers_ItemDataBound;
+            BindUsers(userId);
         }
     }
 }
