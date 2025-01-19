@@ -119,7 +119,7 @@ namespace DivarCloneWebForms
             _authenticationBLL.AssignUserRole(userId, role, true);
 
             rptUsers.ItemDataBound += rptUsers_ItemDataBound;
-            BindUsers(userId);
+            BindUsers();
         }
 
         protected void GiveUserPermission_Click(object sender, EventArgs e)
@@ -135,7 +135,7 @@ namespace DivarCloneWebForms
             _authenticationBLL.GiveUserSpecialPermission(userId, permissionName);
 
             rptUsers.ItemDataBound += rptUsers_ItemDataBound;
-            BindUsers(userId);
+            BindUsers();
         }
 
         protected void RemoveUserSpecialPermission_Click(object sender, EventArgs e)
@@ -151,7 +151,7 @@ namespace DivarCloneWebForms
             _authenticationBLL.RemoveUserSpecialPermission(userId, permissionName);
 
             rptUsers.ItemDataBound += rptUsers_ItemDataBound;
-            BindUsers(userId);
+            BindUsers();
         }
     }
 }
