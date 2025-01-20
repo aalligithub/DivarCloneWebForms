@@ -98,8 +98,6 @@ namespace DivarCloneWebForms
             string searchTerm = searchFieldInput.Text;
             if (!string.IsNullOrEmpty(searchTerm))
                 Response.Redirect("~/Listings.aspx?textToSearch=" + searchTerm);
-            else
-                Response.Write("<script>alert('لطفاً یک عبارت جستجو وارد کنید');</script>");
         }
     }
 }

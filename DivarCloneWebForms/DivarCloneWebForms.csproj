@@ -150,8 +150,8 @@
     <Content Include="EditListing.aspx" />
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
-    <Content Include="ImageCache\icon.png" />
     <Content Include="ImageCache\no_img.jpg" />
+    <Content Include="ImageCache\icon.png" />
     <Content Include="ListingDetail.aspx" />
     <Content Include="Login.aspx" />
     <Content Include="Register.aspx" />
