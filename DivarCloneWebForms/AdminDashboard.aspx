@@ -8,10 +8,24 @@
             <div class="card-header bg-primary text-white">
                 <h4 class="mb-0">User Management</h4>
 
-                <div class="input-group mt-2" style="width:300px;">
-                    <input id="username-search" type="text" class="form-control" placeholder="کاربر" aria-label="Recipient's username" aria-describedby="button-addon2">
-                    <button class="btn" type="button" id="button-addon2" onclick="SearchForUser(document.getElementById('username-search').value)" style="background-color:red; color:white;">جست و جو</button>
-                </div>
+            <%-- Search box --%>
+            <div class="input-group me-3" style="max-width:400px;">
+                <asp:TextBox 
+                    ID="searchFieldInput" 
+                    CssClass="form-control" 
+                    Placeholder="نام کاربری" 
+                    runat="server" 
+                    AutoPostBack="false" 
+                    aria-label="Search">
+                </asp:TextBox>
+    
+                <asp:Button 
+                    ID="searchButton" 
+                    Text="جست و جو" 
+                    CssClass="btn btn-danger" 
+                    OnClick="SearchUsername_Click" 
+                    runat="server" />
+            </div>
                     </div>
 
 <div class="card-body p-4">

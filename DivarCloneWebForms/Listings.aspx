@@ -37,8 +37,8 @@
                                 </div>
 
                                 <div class="card-footer">
-                                    <asp:Button runat="server" ID="deleteListing_btn" OnClick="DeleteListingButton_Click" CommandArgument='<%# Eval("Id") %>' Text="حذف" Visible="false"/>
-                                    <asp:Button runat="server" ID="editListing_btn" Text="ویرایش" PostBackUrl='<%# "~/EditListing.aspx?Id=" + Eval("Id") %>' Visible="false"/>
+                                    <asp:Button runat="server" ID="deleteListing_btn" OnClick="DeleteListingButton_Click" CommandArgument='<%# Eval("Id") %>' Text="حذف" Visible="false" style="background-color: rgb(220, 53, 69); border: 2px solid white; color: white;"/>
+                                    <asp:Button runat="server" ID="editListing_btn" Text="ویرایش" PostBackUrl='<%# "~/EditListing.aspx?Id=" + Eval("Id") %>' Visible="false" style="background-color: rgb(220, 53, 69); border: 2px solid white; color: white;"/>
                                 </div>
                             </div>
                         

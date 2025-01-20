@@ -18,7 +18,7 @@ namespace DivarCloneWebForms
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            if (!PermissionHelper.HasPermission("CanViewDashboard"))
+            if (!ClaimsHelper.HasPermission("CanCreateListing"))
             {
                 Response.Redirect("~/Listings.aspx?message=اجازه لازم را ندارید");
             }

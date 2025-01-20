@@ -63,6 +63,7 @@ namespace DivarClone.BLL
         {
             var claims = new Dictionary<string, string>
             {
+                { "UserId", user.Id.ToString() },
                 { "Email", user.Email },
                 { "Role", user.Role }
             };

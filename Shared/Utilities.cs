@@ -50,7 +50,7 @@ namespace Shared
         public void LogInfo(string message) => LogToOutput($"INFO: {message}");
     }
 
-    public static class PermissionHelper
+    public static class ClaimsHelper
     {
         public static bool HasPermission(string requiredPermission)
         {
@@ -73,5 +73,38 @@ namespace Shared
             }
             return false;
         }
+
+        public static int ReturnUserIdFromClaim()
+        {
+            try
+            {
+                if (HttpContext.Current.User.Identity.IsAuthenticated)
+                {
+                    HttpCookie authCookie = HttpContext.Current.Request.Cookies[FormsAuthentication.FormsCookieName];
+                    if (authCookie != null)
+                    {
+                        FormsAuthenticationTicket ticket = FormsAuthentication.Decrypt(authCookie.Value);
+                        if (ticket != null)
+                        {
+                            var claims = JsonConvert.DeserializeObject<Dictionary<string, string>>(ticket.UserData);
+                            if (claims != null && claims.TryGetValue("UserId", out string userIdString))
+                            {
+                                if (int.TryParse(userIdString, out int userId))
+                                {
+                                    return userId; // Successfully parsed and found UserId
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                throw; // Preserve the original stack trace
+            }
+
+            return -1; // Return a default value when UserId is not found or user is not authenticated
+        }
+
     }
 }

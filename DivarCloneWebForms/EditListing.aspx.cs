@@ -19,10 +19,6 @@ namespace DivarCloneWebForms
         {
             if (!IsPostBack)
             {
-                var connectionString = ConfigurationManager.ConnectionStrings["DivarCloneContextConnection"].ConnectionString;
-
-                var listingDAL = new ListingDAL(connectionString);
-                _listingBLL = new ListingBLL(listingDAL);
                 // Get the listingId from the query string
                 string listingIdStr = Request.QueryString["Id"];
 
@@ -39,8 +35,17 @@ namespace DivarCloneWebForms
             }
         }
 
+        private void InitializeDependencies()
+        {
+            var connectionString = ConfigurationManager.ConnectionStrings["DivarCloneContextConnection"].ConnectionString;
+
+            var listingDAL = new ListingDAL(connectionString);
+            _listingBLL = new ListingBLL(listingDAL);
+        }
+
         private void DisplayListingDetails(int listingId)
         {
+            InitializeDependencies();
             try
             {
                 var listing = _listingBLL.GetAllListingsWithImages(id: listingId);
@@ -77,10 +82,8 @@ namespace DivarCloneWebForms
 
         protected void SubmitEditButton_Click(object sender, EventArgs e)
         {
-            var connectionString = ConfigurationManager.ConnectionStrings["DivarCloneContextConnection"].ConnectionString;
+            InitializeDependencies();
 
-            var listingDAL = new ListingDAL(connectionString);
-            _listingBLL = new ListingBLL(listingDAL);
             var listingDTO = new ListingDTO();
 
             string listingIdStr = Request.QueryString["Id"];
@@ -151,72 +154,71 @@ namespace DivarCloneWebForms
 
             //for Images:
             // Step 1: Gather files from form
-            //var imageFiles = new List<HttpPostedFile>();
-            //for (int i = 1; i <= 6; i++)
-            //{
-            //    var fileControl = Request.Files["ImageFile" + i];
-            //    if (fileControl != null && fileControl.ContentLength > 0)
-            //    {
-            //        imageFiles.Add(fileControl);
-            //    }
-            //}
+            var imageFiles = new List<HttpPostedFile>();
+            for (int i = 1; i <= 6; i++)
+            {
+                var fileControl = Request.Files["ImageFile" + i];
+                if (fileControl != null && fileControl.ContentLength > 0)
+                {
+                    imageFiles.Add(fileControl);
+                }
+            }
 
             ////if there was images process
-            //if (imageFiles.Count > 0)
-            //{
-            //    try
-            //    {
-            //        // Step 2: Deduplicate files using BLL method
-            //        var distinctImages = _listingBLL.CollectDistinctImages(imageFiles);
+            if (imageFiles.Count > 0)
+            {
+                try
+                {
+                    // Step 2: Deduplicate files using BLL method
+                    var distinctImages = _listingBLL.CollectDistinctImages(imageFiles);
 
-            //        var uploadedPaths = new List<string>();
+                    var uploadedPaths = new List<string>();
 
-            //        foreach (var (file, fileHash) in distinctImages)
-            //        {
-            //            // Step 3: Generate unique file path
-            //            string uniqueFileName = $"{fileHash}.jpg";
-            //            string ftpPath = $"Images/Listings/{uniqueFileName}";
+                    foreach (var (file, fileHash) in distinctImages)
+                    {
+                        // Step 3: Generate unique file path
+                        string uniqueFileName = $"{fileHash}.jpg";
+                        string ftpPath = $"Images/Listings/{uniqueFileName}";
 
-            //            // Upload image to FTP
-            //            using (var memoryStream = new MemoryStream())
-            //            {
-            //                file.InputStream.CopyTo(memoryStream); // Read the uploaded file into memory
-            //                byte[] fileBytes = memoryStream.ToArray();
+                        // Upload image to FTP
+                        using (var memoryStream = new MemoryStream())
+                        {
+                            file.InputStream.CopyTo(memoryStream); // Read the uploaded file into memory
+                            byte[] fileBytes = memoryStream.ToArray();
 
-            //                if (_listingBLL.UploadImageToFTP(fileBytes, ftpPath)) // Ensure the file is uploaded
-            //                {
-            //                    uploadedPaths.Add(ftpPath); // Collect the FTP path for DB insertion
+                            if (_listingBLL.UploadImageToFTP(fileBytes, ftpPath)) // Ensure the file is uploaded
+                            {
+                                uploadedPaths.Add(ftpPath); // Collect the FTP path for DB insertion
 
-            //                    // Step 4: Save each file's path and hash to the DB
-            //                    _listingBLL.InsertImagePathIntoDB(listingId, ftpPath, fileHash);
-            //                }
-            //            }
-            //        }
+                                // Step 4: Save each file's path and hash to the DB
+                                _listingBLL.InsertImagePathIntoDB(listingId, ftpPath, fileHash);
+                            }
+                        }
+                    }
 
-            //        //if (isInserted)
-            //        //{
-            //        //    SuccessLabel.Text = "Listing and images saved successfully!";
-            //        //}
-            //        //else
-            //        //{
-            //        //    ErrorLabel.Text = "Failed to save images to the database.";
-            //        //}
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        ErrorLabel.Text = $"An error occurred: {ex.Message}";
-            //    }
-            //}
+                    dangerDiv.Visible = true;
+                    lblError.Text = "عکس اضافه شد";
+
+                    // Fetch listing details
+                    DisplayListingDetails(listingId);
+                }
+                catch (Exception ex)
+                {
+                    dangerDiv.Visible = true;
+                    lblError.Text = $"An error occurred: {ex.Message}";
+
+                    // Fetch listing details
+                    DisplayListingDetails(listingId);
+                }
+            }
             // Redirect or show success message
-            //Response.Redirect("~/SuccessPage.aspx");
+
+            //Response.Redirect("~/Listings.aspx");
         }
 
         protected void DeleteImageButton_Click(object sender, EventArgs e)
         {
-            var connectionString = ConfigurationManager.ConnectionStrings["DivarCloneContextConnection"].ConnectionString;
-
-            var listingDAL = new ListingDAL(connectionString);
-            _listingBLL = new ListingBLL(listingDAL);
+            InitializeDependencies();
 
             Button btn = (Button)sender;
             int imageId = int.Parse(btn.CommandArgument);

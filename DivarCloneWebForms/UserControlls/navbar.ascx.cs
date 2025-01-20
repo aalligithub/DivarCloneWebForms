@@ -21,13 +21,15 @@ namespace DivarCloneWebForms
             if (HttpContext.Current.User.Identity.IsAuthenticated)
             {
                 logout_btn.Visible = true;
+                userWelcome.Visible = true;
+                userWelcome.Text = "خوش آمدید " + HttpContext.Current.User.Identity.Name;
 
-                if(Shared.PermissionHelper.HasPermission("CanCreateListings"))
+                if (Shared.ClaimsHelper.HasPermission("CanCreateListing"))
                     createListing_btn.Visible = true;
 
-                if (Shared.PermissionHelper.HasPermission("CanViewSpecialListing"))
+                if (Shared.ClaimsHelper.HasPermission("CanViewSpecialListing"))
                     createSecretListing_btn.Visible = true;
-            } 
+            }
             else //user isnt logged in
             {
                 login_btn.Visible = true;
@@ -48,6 +50,7 @@ namespace DivarCloneWebForms
         {
             InitializeDependencies();
             _authenticationBLL.Logout();
+            Response.Redirect("~/Listings.aspx");
         }
 
         protected void LoginButton_Click(Object sender, EventArgs e)
@@ -68,6 +71,35 @@ namespace DivarCloneWebForms
         protected void CreateSecretListingButton_Click(Object sender, EventArgs e)
         {
             Response.Redirect("~/CreateNewSecretListing.aspx");
+        }
+
+        protected void ImageHomeButton_Click(object sender, ImageClickEventArgs e)
+        {
+            Response.Redirect("~/Listings.aspx");
+        }
+
+        protected void ElectricListingFilter_Click(object sender, EventArgs e)
+        {
+            Response.Redirect("~/Listings.aspx?filter=0");
+        }
+
+        protected void RealStateListingFilter_Click(Object sender, EventArgs e)
+        {
+            Response.Redirect("~/Listings.aspx?filter=1");
+        }
+
+        protected void VehiclesListingFilter_Click(Object sender, EventArgs e)
+        {
+            Response.Redirect("~/Listings.aspx?filter=2");
+        }
+
+        protected void SearchListingTitle_Click(object sender, EventArgs e)
+        {
+            string searchTerm = searchFieldInput.Text;
+            if (!string.IsNullOrEmpty(searchTerm))
+                Response.Redirect("~/Listings.aspx?textToSearch=" + searchTerm);
+            else
+                Response.Write("<script>alert('لطفاً یک عبارت جستجو وارد کنید');</script>");
         }
     }
 }

@@ -33,9 +33,10 @@ namespace DivarCloneWebForms
 
             if (Request.QueryString["secret"] != null && Request.QueryString["secret"] == "true")
             {
-                if (PermissionHelper.HasPermission("CanViewSpecialListing"))
+                if (ClaimsHelper.HasPermission("CanViewSpecialListing"))
                 {
                     BindListings(isSecret: true); //ajax?
+                    SetButtonsVisibility();
                 }
                 else
                 {
@@ -47,6 +48,16 @@ namespace DivarCloneWebForms
             if (Request.QueryString["username"] != null)
             {
                 BindListings(username: Request.QueryString["username"]); //ajax?
+            }
+
+            if (Request.QueryString["filter"] != null)
+            {
+                BindListings(categoryEnum: int.Parse(Request.QueryString["filter"])); //ajax?
+            }
+
+            if (Request.QueryString["textToSearch"] != null)
+            {
+                BindListings(textToSearch: Request.QueryString["textToSearch"]); //ajax?
             }
         }
 
@@ -65,7 +76,7 @@ namespace DivarCloneWebForms
                 Button deleteBtn = (Button)item.FindControl("deleteListing_btn");
                 Button editBtn = (Button)item.FindControl("editListing_btn");
 
-                if (PermissionHelper.HasPermission("CanViewSpecialListing"))
+                if (ClaimsHelper.HasPermission("CanViewSpecialListing"))
                 {
                     if (deleteBtn != null)
                     {

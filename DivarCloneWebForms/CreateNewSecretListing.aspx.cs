@@ -15,7 +15,7 @@ namespace DivarCloneWebForms
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            if (!PermissionHelper.HasPermission("CanViewSpecialListing"))
+            if (!ClaimsHelper.HasPermission("CanViewSpecialListing"))
             {
                 Response.Redirect("~/Listings.aspx?message=اجازه لازم را ندارید");
             }
@@ -95,7 +95,7 @@ namespace DivarCloneWebForms
                     DateTimeOfPosting = DateTime.Now,
                 };
 
-                listingId = _listingBLL.CreateListingAsync(listing);
+                listingId = _listingBLL.CreateSecretListingAsync(listing);
 
                 masterPage.MasterLabel.Text = "آگهی با موفقیت اضافه شد!";
             }

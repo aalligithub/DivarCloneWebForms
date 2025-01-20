@@ -5,9 +5,11 @@ using DivarClone.DAL;
 using System.Configuration;
 using System.Linq;
 using System.Collections.Generic;
-using static Shared.PermissionHelper;
+using static Shared.ClaimsHelper;
 using Shared;
 using System.Security.Policy;
+using System.Web;
+using Microsoft.Ajax.Utilities;
 
 
 namespace DivarCloneWebForms
@@ -19,7 +21,7 @@ namespace DivarCloneWebForms
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            if (!PermissionHelper.HasPermission("CanViewDashboard"))
+            if (!ClaimsHelper.HasPermission("CanViewDashboard"))
             {
                 Response.Redirect("~/Listings.aspx?message=اجازه لازم را ندارید");
             }
@@ -126,6 +128,12 @@ namespace DivarCloneWebForms
             InitializeDependencies();
             _authenticationBLL.AssignUserRole(userId, role, true);
 
+            // if user changes own role needs to login again
+            if (ReturnUserIdFromClaim() == userId)
+            {
+                _authenticationBLL.Logout();
+            }
+
             rptUsers.ItemDataBound += rptUsers_ItemDataBound;
             BindUsers();
         }
@@ -141,6 +149,12 @@ namespace DivarCloneWebForms
             string permissionName = commandArgs[1]; // Permission name from Container.DataItem
 
             _authenticationBLL.GiveUserSpecialPermission(userId, permissionName);
+
+            // if user changes own permissions needs to login again
+            if (ReturnUserIdFromClaim() == userId)
+            {
+                _authenticationBLL.Logout();
+            }
 
             rptUsers.ItemDataBound += rptUsers_ItemDataBound;
             BindUsers();
@@ -160,6 +174,14 @@ namespace DivarCloneWebForms
 
             rptUsers.ItemDataBound += rptUsers_ItemDataBound;
             BindUsers();
+        }
+
+        protected void SearchUsername_Click(object sender, EventArgs e)
+        {
+            if (!searchFieldInput.Text.IsNullOrWhiteSpace())
+                BindUsers(username:searchFieldInput.Text);
+            else
+                Response.Write("<script>alert('لطفاً یک عبارت جستجو وارد کنید');</script>");
         }
     }
 }

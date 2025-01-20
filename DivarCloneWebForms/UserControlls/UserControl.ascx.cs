@@ -16,10 +16,10 @@ namespace DivarCloneWebForms.UserControlls
             {
                 myListings_btn.Visible = true;
 
-                if (PermissionHelper.HasPermission("CanViewDashboard"))
+                if (ClaimsHelper.HasPermission("CanViewDashboard"))
                     adminDash_btn.Visible = true;
                 
-                if (PermissionHelper.HasPermission("CanViewSpecialListing"))
+                if (ClaimsHelper.HasPermission("CanViewSpecialListing"))
                     secretListings_btn.Visible = true;
             }
         }
