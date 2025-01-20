@@ -18,10 +18,6 @@ namespace DivarCloneWebForms
         {
             if (!IsPostBack)
             {
-                var connectionString = ConfigurationManager.ConnectionStrings["DivarCloneContextConnection"].ConnectionString;
-
-                var listingDAL = new ListingDAL(connectionString);
-                _listingBLL = new ListingBLL(listingDAL);
                 // Get the listingId from the query string
                 string listingIdStr = Request.QueryString["Id"];
 
@@ -32,13 +28,23 @@ namespace DivarCloneWebForms
                 }
                 else
                 {
-                    lblError.Text = "Invalid listing ID.";
+                    lblError.Text = "آگهی یافت نشد";
                 }
             }
         }
 
+        private void InitializeDependencies()
+        {
+            var connectionString = ConfigurationManager.ConnectionStrings["DivarCloneContextConnection"].ConnectionString;
+
+            var listingDAL = new ListingDAL(connectionString);
+            _listingBLL = new ListingBLL(listingDAL);
+        }
+
         private void DisplayListingDetails(int listingId)
         {
+            InitializeDependencies();
+
             try
             {
                 var listing = _listingBLL.GetAllListingsWithImages(id:listingId);
@@ -50,14 +56,16 @@ namespace DivarCloneWebForms
                     lblDescription.Text = listing[0].Description;
                     lblPrice.Text = listing[0].Price.ToString();
                     lblPoster.Text = listing[0].Poster;
+                    lblDateTime.Text = listing[0].DateTimeOfPosting.ToString();
+
+                    ListingIdHiddenField.Value = listing[0].Id.ToString();
                     // Bind images to a repeater or other image control
 
-
                     var images = listing[0].Images?
-                        .Select(kv => new { ImageId = kv.Key, ImageData = kv.Value.ImageData })
+                        .Select(kv => new { ImageId = kv.Key, ImageData = kv.Value.ImageData, ListingId = listing[0].Id })
                         .ToList();
 
-                    rptImages.DataSource = images;
+                    rptImages.DataSource = images; //is there a way to bind listing[0].Id alongside?
                     rptImages.DataBind();
                 }
                 else

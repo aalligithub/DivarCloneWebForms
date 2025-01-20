@@ -60,6 +60,24 @@ namespace DivarCloneWebForms
         protected global::System.Web.UI.WebControls.Label lblPoster;
 
         /// <summary>
+        /// lblDateTime control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblDateTime;
+
+        /// <summary>
+        /// ListingIdHiddenField control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.HiddenField ListingIdHiddenField;
+
+        /// <summary>
         /// rptImages control.
         /// </summary>
         /// <remarks>
