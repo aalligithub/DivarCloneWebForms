@@ -5,6 +5,9 @@ using DivarClone.DAL;
 using System.Configuration;
 using System.Linq;
 using System.Collections.Generic;
+using static Shared.PermissionHelper;
+using Shared;
+using System.Security.Policy;
 
 
 namespace DivarCloneWebForms
@@ -16,6 +19,11 @@ namespace DivarCloneWebForms
 
         protected void Page_Load(object sender, EventArgs e)
         {
+            if (!PermissionHelper.HasPermission("CanViewDashboard"))
+            {
+                Response.Redirect("~/Listings.aspx?message=اجازه لازم را ندارید");
+            }
+
             if (!IsPostBack)
             {
                 rptUsers.ItemDataBound += rptUsers_ItemDataBound;

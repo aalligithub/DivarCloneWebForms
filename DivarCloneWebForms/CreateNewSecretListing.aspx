@@ -81,10 +81,6 @@
                 <% } %>
             </div>
 
-
-            <%--<asp:HiddenField ID="Poster" runat="server" Value="<%= User.Identity.Name %>" />--%>
-            <asp:HiddenField ID="Poster" runat="server" Value="User" />
-
             <asp:Button ID="SubmitButton" runat="server" Text="ثبت آگهی" CssClass="btn btn-primary" OnClick="SubmitButton_Click" />
         </asp:Panel>
     </div>

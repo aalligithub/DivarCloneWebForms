@@ -41,14 +41,17 @@
     <div class="container">
         <asp:Panel ID="Panel1" runat="server">
 
+        <div runat="server" ID="dangerDiv" class="alert alert-danger" visible="false">
+            <asp:Label runat="server" ID="lblError" ></asp:Label>
+        </div>
+
+        <div runat="server" ID="successDiv" class="alert alert-success" visible="false">
+            <asp:Label runat="server" ID="lblSuccess" ></asp:Label>
+        </div>
+
         <div class="row">
             <div class="col">
             
-            <asp:Label ID="lblError" runat="server" ForeColor="Red"></asp:Label> 
-
-            <asp:Label ID="ErrorLabel" runat="server"></asp:Label>
-            <asp:Label ID="SuccessLabel" runat="server"></asp:Label>
-
             <div class="mb-3">
                 <label for="Name">تیتر آگهی</label>
                 <asp:TextBox ID="Name" runat="server" CssClass="form-control"></asp:TextBox>
@@ -93,6 +96,9 @@
             <h3>عکس ها</h3>
             <asp:Repeater ID="rptImages" runat="server">
                 <ItemTemplate>
+
+                        <asp:UpdatePanel ID="UpdatePanelListing" runat="server">
+                        <ContentTemplate>
                     <div class="row">
                         <div class="col-4 card m-2" id="image-@id" style="width: 18rem; box-shadow:0px 0px 2px gray;">
                             <img src='<%# Eval("ImageData") %>' id="<%# Eval("ImageId") %>" class="card-img-top" style="margin-top:25px; width: 100%; height: auto; object-fit:contain; box-shadow:0px 0px 2px black" alt="No image"/>
@@ -101,7 +107,8 @@
 						    </div>
                         </div>
                     </div>
-
+                            </ContentTemplate>
+                            </asp:UpdatePanel>
                 </ItemTemplate>
             </asp:Repeater>
             </div>

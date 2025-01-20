@@ -40,11 +40,16 @@
 
         <div class="container body-content">
             <asp:ContentPlaceHolder ID="MainContent" runat="server">
+
                 <%-- navbar --%>
                 <%@ Register src="~/UserControlls/navbar.ascx" tagname="Navbar" tagprefix="uc1" %>
                 <uc1:Navbar ID="Navbar1" runat="server" />
                 <%-- navbar --%>
 
+                <div runat="server" ID="dangerDiv" class="alert alert-danger" visible="false">
+                     <asp:Label runat="server" ID="masterlbl" ></asp:Label>
+                </div>
+               
                 <div class="row">
 
                     <%-- user control --%>

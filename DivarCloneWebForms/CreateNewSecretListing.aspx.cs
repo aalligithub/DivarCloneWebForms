@@ -5,6 +5,7 @@ using System.Web;
 using DivarClone.BLL;
 using DivarClone.DAL;
 using System.Configuration;
+using Shared;
 
 namespace DivarCloneWebForms
 {
@@ -14,23 +15,30 @@ namespace DivarCloneWebForms
 
         protected void Page_Load(object sender, EventArgs e)
         {
+            if (!PermissionHelper.HasPermission("CanViewSpecialListing"))
+            {
+                Response.Redirect("~/Listings.aspx?message=اجازه لازم را ندارید");
+            }
+
             if (!IsPostBack)
             {
-                var connectionString = ConfigurationManager.ConnectionStrings["DivarCloneContextConnection"].ConnectionString;
 
-                var listingDAL = new ListingDAL(connectionString);
-                var _listingBLL = new ListingBLL(listingDAL);
-                var listingDTO = new ListingDTO();
             }
         }
 
-        protected void SubmitButton_Click(object sender, EventArgs e)
+        private void InitializeDependencies()
         {
             var connectionString = ConfigurationManager.ConnectionStrings["DivarCloneContextConnection"].ConnectionString;
 
             var listingDAL = new ListingDAL(connectionString);
-            var _listingBLL = new ListingBLL(listingDAL);
+            _listingBLL = new ListingBLL(listingDAL);
             var listingDTO = new ListingDTO();
+        }
+
+        protected void SubmitButton_Click(object sender, EventArgs e)
+        {
+            InitializeDependencies();
+            DivarCloneWebForms.SiteMaster masterPage = (DivarCloneWebForms.SiteMaster)this.Master;
 
             int? listingId = null;
 
@@ -39,36 +47,36 @@ namespace DivarCloneWebForms
             string description = Description.Text.Trim();
             string price = Price.Text.Trim();
             string category = Category.SelectedValue;
-            string poster = Poster.Value; // Assume the logged-in user
+            string poster = HttpContext.Current.User.Identity.Name;
 
             // Validation
             if (string.IsNullOrEmpty(name))
             {
-                ErrorLabel.Text = "Name cannot be empty.";
+                masterPage.MasterLabel.Text = "برای آگهی نام وارد کنید";
                 return;
             }
 
             if (string.IsNullOrEmpty(description))
             {
-                ErrorLabel.Text = "Description cannot be empty.";
+                masterPage.MasterLabel.Text = "برای آگهی توضیحات وارد کنید";
                 return;
             }
 
             if (!int.TryParse(price, out int parsedPrice) || parsedPrice <= 0)
             {
-                ErrorLabel.Text = "Price must be a valid positive number.";
+                masterPage.MasterLabel.Text = "برای قیمت آگهی عدد مثبت وارد کنید";
                 return;
             }
 
             if (string.IsNullOrEmpty(category))
             {
-                ErrorLabel.Text = "Category must be selected.";
+                masterPage.MasterLabel.Text = "برای آگهی دسته بندی وارد کنید";
                 return;
             }
 
             if (string.IsNullOrEmpty(poster))
             {
-                ErrorLabel.Text = "Poster information is missing.";
+                masterPage.MasterLabel.Text = "آگهی کننده موجود نیست";
                 return;
             }
 
@@ -87,9 +95,9 @@ namespace DivarCloneWebForms
                     DateTimeOfPosting = DateTime.Now,
                 };
 
-                listingId = _listingBLL.CreateSecretListingAsync(listing);
+                listingId = _listingBLL.CreateListingAsync(listing);
 
-                SuccessLabel.Text = "Listing submitted successfully!";
+                masterPage.MasterLabel.Text = "آگهی با موفقیت اضافه شد!";
             }
             catch (Exception ex)
             {
@@ -139,23 +147,14 @@ namespace DivarCloneWebForms
                             }
                         }
                     }
-
-                    //if (isInserted)
-                    //{
-                    //    SuccessLabel.Text = "Listing and images saved successfully!";
-                    //}
-                    //else
-                    //{
-                    //    ErrorLabel.Text = "Failed to save images to the database.";
-                    //}
                 }
                 catch (Exception ex)
                 {
                     ErrorLabel.Text = $"An error occurred: {ex.Message}";
                 }
             }
-            // Redirect or show success message
-            //Response.Redirect("~/SuccessPage.aspx");
+            // Redirect and show success message
+            Response.Redirect("~/Listings.aspx?message=آگهی جدید اضافه شد");
         }
     }
 }

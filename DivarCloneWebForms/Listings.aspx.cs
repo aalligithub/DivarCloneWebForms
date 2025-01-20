@@ -6,6 +6,9 @@ using DivarClone.BLL;
 using DivarClone.DAL;
 using System.Configuration;
 using System.Web.UI.WebControls;
+using System.Security.Policy;
+using Shared;
+using System.Web.Services.Description;
 
 namespace DivarCloneWebForms
 {
@@ -17,19 +20,81 @@ namespace DivarCloneWebForms
         {
             if (!IsPostBack)
             {
-                // Using Web.config for configuration
-                var connectionString = ConfigurationManager.ConnectionStrings["DivarCloneContextConnection"].ConnectionString;
-
-                var listingDAL = new ListingDAL(connectionString);
-                _listingBLL = new ListingBLL(listingDAL);
-
                 BindListings();
+                SetButtonsVisibility();
+            }
+
+            if (Request.QueryString["message"] != null)
+            {
+                var message = Request.QueryString["message"];
+                DivarCloneWebForms.SiteMaster masterPage = (DivarCloneWebForms.SiteMaster)this.Master;
+                masterPage.MasterLabel.Text = message;
+            }
+
+            if (Request.QueryString["secret"] != null && Request.QueryString["secret"] == "true")
+            {
+                if (PermissionHelper.HasPermission("CanViewSpecialListing"))
+                {
+                    BindListings(isSecret: true); //ajax?
+                }
+                else
+                {
+                    DivarCloneWebForms.SiteMaster masterPage = (DivarCloneWebForms.SiteMaster)this.Master;
+                    masterPage.MasterLabel.Text = "اجازه لازم را ندارید";
+                } 
+            }
+
+            if (Request.QueryString["username"] != null)
+            {
+                BindListings(username: Request.QueryString["username"]); //ajax?
             }
         }
 
-        private void BindListings()
+        private void InitializeDependencies()
         {
-            var listings = _listingBLL.GetAllListingsWithImages();
+            var connectionString = ConfigurationManager.ConnectionStrings["DivarCloneContextConnection"].ConnectionString;
+
+            var listingDAL = new ListingDAL(connectionString);
+            _listingBLL = new ListingBLL(listingDAL);
+        }
+
+        private void SetButtonsVisibility()
+        {
+            foreach (RepeaterItem item in rptListings.Items)
+            {
+                Button deleteBtn = (Button)item.FindControl("deleteListing_btn");
+                Button editBtn = (Button)item.FindControl("editListing_btn");
+
+                if (PermissionHelper.HasPermission("CanViewSpecialListing"))
+                {
+                    if (deleteBtn != null)
+                    {
+                        deleteBtn.Visible = true; // Show the delete button
+                    }
+                    if (editBtn != null)
+                    {
+                        editBtn.Visible = true; // Show the edit button
+                    }
+                }
+                else
+                {
+                    if (deleteBtn != null)
+                    {
+                        deleteBtn.Visible = false; // Hide the delete button
+                    }
+                    if (editBtn != null)
+                    {
+                        editBtn.Visible = false; // Hide the edit button
+                    }
+                }
+            }
+        }
+
+        private void BindListings(int? id = null, string username = null, string textToSearch = null, int? categoryEnum = null, bool includeImages = true, bool isSecret = false)
+        {
+            InitializeDependencies();
+
+            var listings = _listingBLL.GetAllListingsWithImages(id, username, textToSearch, categoryEnum, includeImages, isSecret);
             rptListings.DataSource = listings;
             rptListings.DataBind();
         }
@@ -44,24 +109,28 @@ namespace DivarCloneWebForms
             return string.Empty; // Fallback if no image is available
         }
 
-        protected void DeleteImageButton_Click(object sender, EventArgs e)
+        protected void DeleteListingButton_Click(object sender, EventArgs e)
         {
-            var connectionString = ConfigurationManager.ConnectionStrings["DivarCloneContextConnection"].ConnectionString;
+            InitializeDependencies();
 
-            var listingDAL = new ListingDAL(connectionString);
-            _listingBLL = new ListingBLL(listingDAL);
-
+            DivarCloneWebForms.SiteMaster masterPage = (DivarCloneWebForms.SiteMaster)this.Master;
+            
             Button btn = (Button)sender;
             int listingId = int.Parse(btn.CommandArgument);
 
             if (_listingBLL.DeleteListing(listingId))
             {
-                //success label
+                masterPage.MasterLabel.Text = "آگهی با موفقیت حذف شد";
+                masterPage.UpdateDangerDivVisibility();
             }
             else
             {
-                //error label
+                masterPage.MasterLabel.Text = "آگهی حذف نشد";
+                masterPage.UpdateDangerDivVisibility();
             }
+
+            BindListings();
+            SetButtonsVisibility();
         }
     }
 }

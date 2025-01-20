@@ -15,11 +15,8 @@
         }
 	</style>
 	<div class="list-group">
-        <a href="#" class="list-group-item list-group-item-action user-control-menu">آگهی های من</a>
-
-		<a href="#" class="list-group-item list-group-item-action user-control-menu">آگهی های خاص</a>
-
-        <a href="#" class="list-group-item list-group-item-action user-control-menu">داشبورد ادمین</a>
-
+        <asp:button class="btn btn-outline-secondary" Text="داشبورد ادمین" type="button" ID="adminDash_btn" runat="server" OnClick="AdminDashButton_Click" Visible="false"></asp:button>
+        <asp:button class="btn btn-outline-secondary" Text="آگهی های خاص" type="button" ID="secretListings_btn" runat="server" OnClick="SecretListingsButton_Click" Visible="false"></asp:button>
+        <asp:button class="btn btn-outline-secondary" Text="آگهی های من" type="button" ID="myListings_btn" runat="server" OnClick="MyListingsButton_Click" Visible="false"></asp:button>
 	</div>
 </div>

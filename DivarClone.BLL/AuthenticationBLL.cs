@@ -25,6 +25,8 @@ namespace DivarClone.BLL
         Task<bool> RemoveUserSpecialPermission(int userId, string permissionName);
 
         bool GiveUserSpecialPermission(int userId, string permissionName);
+
+        void Logout();
     }
 
     public class AuthenticationBLL: IAuthenticationBLL
@@ -69,6 +71,22 @@ namespace DivarClone.BLL
             {
                 var permissions = string.Join(",", user.Permissions);
                 claims.Add("Permissions", permissions);
+            }
+
+            if (user.SpecialPermission != null && user.SpecialPermission.Any())
+            {
+                var specialPermissions = string.Join(",", user.SpecialPermission);
+
+                if (claims.ContainsKey("Permissions"))
+                {
+                    // Append special permissions to existing permissions
+                    claims["Permissions"] += "," + specialPermissions;
+                }
+                else
+                {
+                    // Add special permissions as a new key if Permissions doesn't exist
+                    claims.Add("Permissions", specialPermissions);
+                }
             }
 
             //usage

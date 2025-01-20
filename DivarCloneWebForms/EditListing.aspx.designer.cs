@@ -24,6 +24,15 @@ namespace DivarCloneWebForms
         protected global::System.Web.UI.WebControls.Panel Panel1;
 
         /// <summary>
+        /// dangerDiv control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl dangerDiv;
+
+        /// <summary>
         /// lblError control.
         /// </summary>
         /// <remarks>
@@ -33,22 +42,22 @@ namespace DivarCloneWebForms
         protected global::System.Web.UI.WebControls.Label lblError;
 
         /// <summary>
-        /// ErrorLabel control.
+        /// successDiv control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label ErrorLabel;
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl successDiv;
 
         /// <summary>
-        /// SuccessLabel control.
+        /// lblSuccess control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label SuccessLabel;
+        protected global::System.Web.UI.WebControls.Label lblSuccess;
 
         /// <summary>
         /// Name control.

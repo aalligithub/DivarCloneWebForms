@@ -33,7 +33,8 @@ namespace DivarCloneWebForms
                 }
                 else
                 {
-                    lblError.Text = "Invalid listing ID.";
+                    dangerDiv.Visible= true;
+                    lblError.Text = "آگهی یافت نشد";
                 }
             }
         }
@@ -64,7 +65,8 @@ namespace DivarCloneWebForms
                 }
                 else
                 {
-                    lblError.Text = "Listing not found.";
+                    dangerDiv.Visible = true;
+                    lblError.Text = "آگهی یافت نشد";
                 }
             }
             catch (Exception ex)
@@ -75,13 +77,10 @@ namespace DivarCloneWebForms
 
         protected void SubmitEditButton_Click(object sender, EventArgs e)
         {
-
-            // CALL A BLL METHOD THAT TAKES DATA AND CALLS A DAL METHOD THAT RUNS A STORED PROCEDURE, UPDATING THE LISTING, IMAGE STUFF HAPPENS SOMEWHERE ELSE
-
             var connectionString = ConfigurationManager.ConnectionStrings["DivarCloneContextConnection"].ConnectionString;
 
             var listingDAL = new ListingDAL(connectionString);
-            var _listingBLL = new ListingBLL(listingDAL);
+            _listingBLL = new ListingBLL(listingDAL);
             var listingDTO = new ListingDTO();
 
             string listingIdStr = Request.QueryString["Id"];
@@ -97,25 +96,29 @@ namespace DivarCloneWebForms
             // Validation
             if (string.IsNullOrEmpty(name))
             {
-                ErrorLabel.Text = "Name cannot be empty.";
+                dangerDiv.Visible = true;
+                lblError.Text = "نام نمیتواند خالی باشد";
                 return;
             }
 
             if (string.IsNullOrEmpty(description))
             {
-                ErrorLabel.Text = "Description cannot be empty.";
+                dangerDiv.Visible = true;
+                lblError.Text = "توضیحات نمیتواند خالی باشد";
                 return;
             }
 
             if (!int.TryParse(price, out int parsedPrice) || parsedPrice <= 0)
             {
-                ErrorLabel.Text = "Price must be a valid positive number.";
+                dangerDiv.Visible = true;
+                lblError.Text = "قیمت میبایست یک عدد مثبت باشد";
                 return;
             }
 
             if (string.IsNullOrEmpty(category))
             {
-                ErrorLabel.Text = "Category must be selected.";
+                dangerDiv.Visible = true;
+                lblError.Text = "دسته بندی انتخاب کنید";
                 return;
             }
 
@@ -135,11 +138,15 @@ namespace DivarCloneWebForms
 
                 _listingBLL.UpdateListing(listingId, listing);
 
-                SuccessLabel.Text = "Listing updated successfully!";
+                successDiv.Visible = true;
+                lblSuccess.Text = "آگهی با موفقیت تغییر کرد";
+
+                DisplayListingDetails(listingId);                
             }
             catch (Exception ex)
             {
-                ErrorLabel.Text = $"An error occurred: {ex.Message}";
+                dangerDiv.Visible = true;
+                lblError.Text = $"An error occurred: {ex.Message}";
             }
 
             //for Images:
@@ -216,9 +223,21 @@ namespace DivarCloneWebForms
 
             if (_listingBLL.DeleteListingImage(imageId))
             {
-                SuccessLabel.Text = "عکس حذف شد";
+
+                successDiv.Visible = true;
+                lblSuccess.Text = "عکس حذف شد";
+
+                string listingIdStr = Request.QueryString["Id"];
+                if (int.TryParse(listingIdStr, out int listingId))
+                {
+                    // Fetch listing details
+                    DisplayListingDetails(listingId);
+                }
             }
-            else { ErrorLabel.Text = "خطای حذف عکس"; }
+            else {
+                dangerDiv.Visible = true;
+                lblError.Text = "خطای حذف عکس";
+            }
         }
     }
 }

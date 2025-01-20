@@ -174,12 +174,19 @@ namespace DivarClone.DAL
                         userDTO.Role = rdr["RoleName"].ToString();
 
                         var permissions = rdr["Permissions"].ToString().Split(',');
+                        var specialPermissions = rdr["SpecialPermissions"].ToString().Split(',');
 
                         userDTO.Permissions = new List<string>();
+                        userDTO.SpecialPermission = new List<string>();
 
                         foreach (var permission in permissions)
                         {
                             userDTO.Permissions.Add(permission);
+                        }
+
+                        foreach (var specialPermission in specialPermissions)
+                        {
+                            userDTO.SpecialPermission.Add(specialPermission);
                         }
 
                         return userDTO;

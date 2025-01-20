@@ -10,12 +10,10 @@
 
         <div class="collapse navbar-collapse" id="navbarContent">
             <ul class="navbar-nav me-auto">
-                <li class="nav-item">
-                            
-                </li>
 
                 <li class="nav-item">
-                    <a class="btn btn-danger ms-2" asp-area="" asp-controller="AddListing" asp-action="Index">ثبت آگهی</a>
+                    <asp:button class="btn btn-outline-secondary" Text="ثبت آگهی" type="button" ID="createListing_btn" runat="server" OnClick="CreateListingButton_Click" Visible="false"></asp:button>
+                    <asp:button class="btn btn-outline-secondary" Text="ثبت آگهی خاص" type="button" ID="createSecretListing_btn" runat="server" OnClick="CreateSecretListingButton_Click" Visible="false"></asp:button>
 
                 </li>
             </ul>
@@ -35,7 +33,10 @@
             <button class="btn btn-outline-secondary" type="button" id="button-addon2" onclick="filterByText(document.getElementById('searchFieldInput').value)">جست و جو</button>
 
             <asp:Panel ID="Panel2" runat="server">
-                <asp:button class="btn btn-outline-secondary" Text="خروج" type="button" ID="logout_btn" runat="server" OnClick="LogoutButton_Click"></asp:button>
+                <asp:button class="btn btn-outline-secondary" Text="خروج" type="button" ID="logout_btn" runat="server" OnClick="LogoutButton_Click" Visible="false"></asp:button>
+                <asp:button class="btn btn-outline-secondary" Text="ورود" type="button" ID="login_btn" runat="server" OnClick="LoginButton_Click" Visible="false"></asp:button>
+                <asp:button class="btn btn-outline-secondary" Text="ثبت نام" type="button" ID="register_btn" runat="server" OnClick="RegisterButton_Click" Visible="false"></asp:button>
+
             </asp:Panel>
         </div>
         <div style="margin-left:40px;">
