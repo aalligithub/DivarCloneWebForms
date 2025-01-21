@@ -13,7 +13,7 @@
 
                     <input type="hidden" id="hiddenAntiForgeryToken" runat="server" />
 
-                    <div class="tab-content mt-3" id="myTabContent" style="background-color:rgb(220, 53, 69); border-radius:20px;">
+                    <div class="tab-content mt-3" id="myTabContent" style="background-color:rgb(220, 53, 69); border-radius:20px; color:white;">
                         <div class="tab-pane fade show active" id="register" role="tabpanel">
                             <h3 class="register-heading pt-4" style="text-align:center; color:white; text-shadow:0px 0px 3px white;">عضویت به عنوان کاربر</h3>
 

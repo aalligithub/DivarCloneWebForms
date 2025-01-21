@@ -2,6 +2,7 @@
 using DivarClone.BLL;
 using DivarClone.DAL;
 using System.Configuration;
+using System.Web.UI;
 
 namespace DivarCloneWebForms
 {
@@ -23,6 +24,8 @@ namespace DivarCloneWebForms
             var _authenticationBLL = new AuthenticationBLL(authenticationDAL);
             var userDTO = new UserDTO();
 
+            DivarCloneWebForms.SiteMaster masterPage = (DivarCloneWebForms.SiteMaster)this.Master;
+
             string email = Email.Text;
             string password = Password.Text;
 
@@ -31,11 +34,13 @@ namespace DivarCloneWebForms
             if (userDTO != null)
             {
                 _authenticationBLL.AuthorizeUser(userDTO);
-                SuccessLabel.Text = "success";
+                masterPage.MasterLabel.Text = "وارد شدید";
+
+                Response.Redirect("~/Listings.aspx");
             }
             else
             {
-                ErrorLabel.Text = "Wrong";
+                masterPage.MasterLabel.Text = "اطلاعات ورود اشتباه است";
             }
 
         }

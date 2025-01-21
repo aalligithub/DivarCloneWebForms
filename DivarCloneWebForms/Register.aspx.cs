@@ -14,7 +14,6 @@ namespace DivarCloneWebForms
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-            string connectionString = ConfigurationManager.AppSettings["connectionstrings"];
 
         }
 
@@ -25,6 +24,8 @@ namespace DivarCloneWebForms
             var authenticationDAL = new AuthenticationDAL(connectionString);
             var _authenticationBLL = new AuthenticationBLL(authenticationDAL);
             var userDTO = new UserDTO();
+
+            DivarCloneWebForms.SiteMaster masterPage = (DivarCloneWebForms.SiteMaster)this.Master;
 
             string password = passwordFiled.Text;
             string passwordRepeat = passwordRepeatField.Text;
@@ -37,12 +38,13 @@ namespace DivarCloneWebForms
                 userDTO.Email = emailField.Text;
                 userDTO.PhoneNumber = phonenumberField.Text;
 
-                _authenticationBLL.SignUserUp(userDTO);
-
-                //add success message
+                if (_authenticationBLL.SignUserUp(userDTO))
+                    Response.Redirect("~/Login.aspx");
+                else
+                    masterPage.MasterLabel.Text = "ثبت نام موفقیت آمیز نبود";
             }
             else {
-                // show error for password
+                masterPage.MasterLabel.Text = "تکرار رمز عبور با رمز عبور همخوانی ندارد";
             }
         }
     }
