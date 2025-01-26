@@ -24,7 +24,17 @@ namespace DivarCloneWebForms
                 if (int.TryParse(listingIdStr, out int listingId))
                 {
                     // Fetch listing details
-                    DisplayListingDetails(listingId);
+                    InitializeDependencies();
+
+                    var listing = _listingBLL.GetAllListingsWithImages(id: listingId);
+
+                    if (listing.Count == 0)
+                    {
+                        listing = _listingBLL.GetAllListingsWithImages(id: listingId, isSecret: true);
+                        DisplayListingDetails(listing[0]);
+                    }
+
+                    DisplayListingDetails(listing[0]);                    
                 }
                 else
                 {
@@ -41,28 +51,26 @@ namespace DivarCloneWebForms
             _listingBLL = new ListingBLL(listingDAL);
         }
 
-        private void DisplayListingDetails(int listingId)
+        private void DisplayListingDetails(ListingDTO listing)
         {
             InitializeDependencies();
 
             try
             {
-                var listing = _listingBLL.GetAllListingsWithImages(id:listingId);
-
-                if (listing != null && listing.Count > 0)
+                if (listing != null)
                 {
                     // Populate UI controls with listing data
-                    lblListingName.Text = listing[0].Name;
-                    lblDescription.Text = listing[0].Description;
-                    lblPrice.Text = listing[0].Price.ToString();
-                    lblPoster.Text = listing[0].Poster;
-                    lblDateTime.Text = listing[0].DateTimeOfPosting.ToString();
+                    lblListingName.Text = listing.Name;
+                    lblDescription.Text = listing.Description;
+                    lblPrice.Text = listing.Price.ToString();
+                    lblPoster.Text = listing.Poster;
+                    lblDateTime.Text = listing.DateTimeOfPosting.ToString();
 
-                    ListingIdHiddenField.Value = listing[0].Id.ToString();
+                    ListingIdHiddenField.Value = listing.Id.ToString();
                     // Bind images to a repeater or other image control
 
-                    var images = listing[0].Images?
-                        .Select(kv => new { ImageId = kv.Key, ImageData = kv.Value.ImageData, ListingId = listing[0].Id })
+                    var images = listing.Images?
+                        .Select(kv => new { ImageId = kv.Key, ImageData = kv.Value.ImageData, ListingId = listing.Id })
                         .ToList();
 
                     rptImages.DataSource = images; //is there a way to bind listing[0].Id alongside?

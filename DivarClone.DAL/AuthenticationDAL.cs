@@ -122,7 +122,7 @@ namespace DivarClone.DAL
                     cmd.Parameters.AddWithValue("@Phone", userDTO.PhoneNumber);
                     cmd.Parameters.AddWithValue("@Username", userDTO.Username);
 
-                    SqlDataReader rdr = cmd.ExecuteReader();
+                     SqlDataReader rdr = cmd.ExecuteReader();
 
                     if (rdr.Read()) {
 
@@ -130,11 +130,14 @@ namespace DivarClone.DAL
 
                         return true;
                     }
-                    else
-                    {
-                        return false;
-                    }
+                    //else
+                    //{
+                    //    //reverse transaction
+                    //    //default role assignment moved to db, this is irrelevent
+                    //    return false;
+                    //}
 
+                    return true;
                 }
                 catch (Exception ex)
                 {

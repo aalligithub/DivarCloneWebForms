@@ -99,16 +99,16 @@
 
                         <asp:UpdatePanel ID="UpdatePanelListing" runat="server">
                         <ContentTemplate>
-                    <div class="row">
-                        <div class="col-4 card m-2" id="image-@id" style="width: 18rem; box-shadow:0px 0px 2px gray;">
-                            <img src='<%# Eval("ImageData") %>' id="<%# Eval("ImageId") %>" class="card-img-top" style="margin-top:25px; width: 100%; height: auto; object-fit:contain; box-shadow:0px 0px 2px black" alt="No image"/>
-                            <div class="card-body">
-							    <asp:Button ID="btnDelete" runat="server" Text="حذف عکس" OnClick="DeleteImageButton_Click" CommandArgument='<%# Eval("ImageId") %>' CssClass="btn btn-danger" />
-						    </div>
-                        </div>
-                    </div>
-                            </ContentTemplate>
-                            </asp:UpdatePanel>
+                            <div class="row">
+                                <div class="col-4 card m-2" id="image-@id" style="width: 18rem; box-shadow:0px 0px 2px gray;">
+                                    <img src='<%# Eval("ImageData") %>' id="<%# Eval("ImageId") %>" class="card-img-top" style="margin-top:25px; width: 100%; height: auto; object-fit:contain; box-shadow:0px 0px 2px black" alt="No image"/>
+                                    <div class="card-body">
+							            <asp:Button ID="btnDelete" runat="server" Text="حذف عکس" OnClick="DeleteImageButton_Click" CommandArgument='<%# Eval("ImageId") %>' CssClass="btn btn-danger" />
+						            </div>
+                                </div>
+                            </div>
+                        </ContentTemplate>
+                        </asp:UpdatePanel>
                 </ItemTemplate>
             </asp:Repeater>
             </div>

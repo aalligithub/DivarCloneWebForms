@@ -49,6 +49,10 @@ namespace DivarCloneWebForms
             try
             {
                 var listing = _listingBLL.GetAllListingsWithImages(id: listingId);
+                if (listing.Count == 0)
+                {
+                    listing = _listingBLL.GetAllListingsWithImages(id: listingId, isSecret: true);
+                }
 
                 if (listing != null && listing.Count > 0)
                 {
@@ -225,7 +229,6 @@ namespace DivarCloneWebForms
 
             if (_listingBLL.DeleteListingImage(imageId))
             {
-
                 successDiv.Visible = true;
                 lblSuccess.Text = "عکس حذف شد";
 
